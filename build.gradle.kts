@@ -13,6 +13,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test-junit"))
     implementation(kotlin("stdlib-jdk8"))
+    implementation("com.github.gumtreediff", "core", "2.1.2")
 }
 
 tasks.withType<KotlinCompile> {
