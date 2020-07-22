@@ -1,3 +1,5 @@
+package org.jetbrains.research.transformations
+
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
