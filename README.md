@@ -1,7 +1,7 @@
 # ast-canonicalization
 
 
-[![elena-lyulina](https://circleci.com/gh/elena-lyulina/ast-canonicalization/tree/setup.svg?style=shield)](https://app.circleci.com/pipelines/github/elena-lyulina/ast-canonicalization?branch=setup)
+[![elena-lyulina](https://circleci.com/gh/elena-lyulina/ast-canonicalization/tree/master.svg?style=shield)](https://app.circleci.com/pipelines/github/elena-lyulina/ast-canonicalization?branch=master)
 
 This repository contains AST-transformations that transform AST to a canonicalized state. These transformations are applied for the AST that is parsed by [this](src/main/python/pythonparser-3.py) **python3** parser. Source code is in [this](https://github.com/Varal7/pythonparser) repository and [this](https://eth-sri.github.io/py150) project.
 
