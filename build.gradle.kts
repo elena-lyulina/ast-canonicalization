@@ -16,6 +16,16 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     implementation("org.junit.jupiter:junit-jupiter-engine:5.6.0")
     implementation("com.github.gumtreediff", "core", "2.1.2")
+    implementation("com.github.gumtreediff", "client", "2.1.2")
+    implementation("com.github.gumtreediff", "client.diff", "2.1.2")
+    implementation("com.github.gumtreediff", "core", "2.1.2")
+    implementation("com.github.gumtreediff", "gen.python", "2.1.2")
+    implementation("com.github.gumtreediff", "gen.antlr3", "2.1.2")
+    implementation("com.github.gumtreediff", "gen.antlr3", "2.1.2")
+    implementation("com.github.gumtreediff", "gen.antlr3-antlr", "2.1.2")
+    implementation("com.github.gumtreediff", "gen.antlr3-xml", "2.1.2")
+    implementation("com.github.gumtreediff", "gen.antlr4", "2.1.2")
+    implementation("com.github.gumtreediff", "gen.jdt", "2.1.2")
 }
 
 tasks {
