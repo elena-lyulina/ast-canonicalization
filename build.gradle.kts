@@ -11,11 +11,15 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test-junit"))
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     implementation("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+    implementation("com.github.gumtreediff", "client", "2.1.2")
+    implementation("com.github.gumtreediff", "client.diff", "2.1.2")
     implementation("com.github.gumtreediff", "core", "2.1.2")
+
+    testImplementation("com.github.gumtreediff", "gen.python", "2.1.2")
+    testImplementation(kotlin("test-junit"))
 }
 
 tasks {

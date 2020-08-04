@@ -1,4 +1,4 @@
-package org.jetbrains.research.transformations
+package org.jetbrains.research.transformations.maintests
 
 import org.junit.jupiter.api.Test
 
@@ -10,4 +10,5 @@ internal class MainKtTest {
     fun sum() {
         assertEquals(10, 5 + 5)
     }
+
 }
