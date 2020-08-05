@@ -2,12 +2,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.72"
+    id("org.jetbrains.dokka") version "1.4.0-rc"
 }
 group = "io.github.elena-lyulina.ast-canonicalization"
 version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -20,6 +22,7 @@ dependencies {
 
     testImplementation("com.github.gumtreediff", "gen.python", "2.1.2")
     testImplementation(kotlin("test-junit"))
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.0-rc")
 }
 
 tasks {
@@ -31,5 +34,11 @@ tasks {
     }
     test {
         useJUnitPlatform()
+
+        dependsOn("cleanTest")
+
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
     }
 }

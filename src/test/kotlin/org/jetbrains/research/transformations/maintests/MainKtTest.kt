@@ -6,9 +6,4 @@ import org.junit.jupiter.api.Assertions.*
 
 internal class MainKtTest {
 
-    @Test
-    fun sum() {
-        assertEquals(10, 5 + 5)
-    }
-
 }
