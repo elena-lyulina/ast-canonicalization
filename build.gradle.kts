@@ -22,7 +22,6 @@ dependencies {
 
     testImplementation("com.github.gumtreediff", "gen.python", "2.1.2")
     testImplementation(kotlin("test-junit"))
-    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.0-rc")
 }
 
 tasks {
