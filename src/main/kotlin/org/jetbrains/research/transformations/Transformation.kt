@@ -7,6 +7,8 @@ import com.github.gumtreediff.tree.ITree
  */
 interface Transformation {
 
+    abstract val metadataKey: String
+
     /**
      * Applying forward transformation.
      * @param [tree] - Abstract syntax tree, built on a source code.
