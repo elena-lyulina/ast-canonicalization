@@ -1,5 +1,8 @@
 package org.jetbrains.research.transformations.util
 
+import com.github.gumtreediff.gen.Generators
+import com.github.gumtreediff.gen.python.PythonTreeGenerator
+import com.github.gumtreediff.io.TreeIoUtils
 import java.io.File
 import java.util.logging.Logger
 
@@ -9,7 +12,7 @@ import java.util.logging.Logger
  */
 object ParserSetup {
     private val LOG = Logger.getLogger(javaClass.name)
-    private const val PARSER_NAME = "pythonparser.py"
+    private const val PARSER_NAME = "pythonparser"
     private val TARGET_PATH = "${System.getProperty("java.io.tmpdir")}$PARSER_NAME"
 
     /**
@@ -22,7 +25,7 @@ object ParserSetup {
         try {
             LOG.info("Putting parser into $targetPath")
 
-            val pythonparserFile = File(javaClass.getResource(PARSER_NAME).path)
+            val pythonparserFile = File(javaClass.getResource("$PARSER_NAME.py").path)
             val targetFile = File(targetPath)
             pythonparserFile.copyTo(targetFile)
 
