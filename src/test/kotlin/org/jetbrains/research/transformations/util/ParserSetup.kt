@@ -9,7 +9,8 @@ import java.util.logging.Logger
  */
 object ParserSetup {
     private val LOG = Logger.getLogger(javaClass.name)
-    private const val TARGET_PATH = "/tmp/pythonparser"
+    private const val PARSER_NAME = "pythonparser.py"
+    private val TARGET_PATH = "${System.getProperty("java.io.tmpdir")}$PARSER_NAME"
 
     /**
      * Puts parser file to the target path.
@@ -21,12 +22,12 @@ object ParserSetup {
         try {
             LOG.info("Putting parser into $targetPath")
 
-            val pythonparserFile = File(javaClass.getResource("pythonparser.py").path)
+            val pythonparserFile = File(javaClass.getResource(PARSER_NAME).path)
             val targetFile = File(targetPath)
             pythonparserFile.copyTo(targetFile)
 
             // add pythonparser's path into system path
-            System.setProperty("gt.pp.path", "/tmp/pythonparser")
+            System.setProperty("gt.pp.path", TARGET_PATH)
 
         } catch (e: FileAlreadyExistsException) {
             LOG.info("Parser file is already in $TARGET_PATH")
