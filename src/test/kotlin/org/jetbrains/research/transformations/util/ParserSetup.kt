@@ -1,5 +1,8 @@
 package org.jetbrains.research.transformations.util
 
+import com.github.gumtreediff.gen.Generators
+import com.github.gumtreediff.gen.python.PythonTreeGenerator
+import com.github.gumtreediff.io.TreeIoUtils
 import java.io.File
 import java.util.logging.Logger
 
@@ -9,7 +12,8 @@ import java.util.logging.Logger
  */
 object ParserSetup {
     private val LOG = Logger.getLogger(javaClass.name)
-    private const val TARGET_PATH = "/tmp/pythonparser"
+    private const val PARSER_NAME = "pythonparser"
+    private val TARGET_PATH = "${getTmpPath()}/$PARSER_NAME"
 
     /**
      * Puts parser file to the target path.
@@ -20,13 +24,8 @@ object ParserSetup {
 
         try {
             LOG.info("Putting parser into $targetPath")
-
-            val pythonparserFile = File(javaClass.getResource("pythonparser.py").path)
-            val targetFile = File(targetPath)
-            pythonparserFile.copyTo(targetFile)
-
-            // add pythonparser's path into system path
-            System.setProperty("gt.pp.path", "/tmp/pythonparser")
+            val pythonparserFile = File(javaClass.getResource("$PARSER_NAME.py").path)
+            pythonparserFile.copyTo(File(targetPath))
 
         } catch (e: FileAlreadyExistsException) {
             LOG.info("Parser file is already in $TARGET_PATH")
@@ -54,14 +53,20 @@ object ParserSetup {
     fun checkSetup() {
         LOG.info("Checking correctness of a parser setup")
         val targetFile = File(TARGET_PATH)
-        if (targetFile.exists()) {
-            LOG.info("Parser file already exists in $TARGET_PATH")
-            return
-        }
-        else {
+        if (!targetFile.exists()) {
             LOG.info("Parser file will be created in $TARGET_PATH")
             putParserToTargetPath()
             makeFileExecutable(targetFile)
         }
+        else {
+            LOG.info("Parser file already exists in $TARGET_PATH")
+        }
+        // add pythonparser's path into system path
+        System.setProperty("gt.pp.path", TARGET_PATH)
+    }
+
+    private fun getTmpPath(): String {
+        val tmpPath = System.getProperty("java.io.tmpdir")
+        return tmpPath.removeSuffix("/")
     }
 }
