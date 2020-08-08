@@ -15,12 +15,21 @@ object Anonymization: Transformation {
 
         while (treeIterator.hasNext()) {
             val node = treeIterator.next()
-            println("${treeCtx.getTypeLabel(node)} ${node.label}")
 
             if (treeCtx.getTypeLabel(node) == "NameStore") {
                 anonymNamesMap.getOrPut(node.label, { setAnonLabel(node, toStoreMetadata) })
             }
+
+            if (treeCtx.getTypeLabel(node) == "NameLoad") {
+                if (node.label in anonymNamesMap.keys) {
+                    val newLabel = anonymNamesMap[node.label]
+                    if (toStoreMetadata) node.setMetadata(newLabel, node.label)
+                    node.label = newLabel
+                }
+
+            }
         }
+
         return
     }
 
@@ -39,6 +48,9 @@ object Anonymization: Transformation {
         while (treeIterator.hasNext()) {
             val node = treeIterator.next()
             if (treeCtx.getTypeLabel(node) == "NameStore") {
+                node.label = node.getMetadata(node.label) as String
+            }
+            if (treeCtx.getTypeLabel(node) == "NameLoad" && node.label in anonymNamesMap.values) {
                 node.label = node.getMetadata(node.label) as String
             }
         }
