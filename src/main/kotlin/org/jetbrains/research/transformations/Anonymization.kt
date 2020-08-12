@@ -5,11 +5,13 @@ import com.github.gumtreediff.tree.TreeContext
 
 object Anonymization: Transformation {
     override val metadataKey = "anonymization"
-    private val anonymNamesMap: MutableMap<String, String> = mutableMapOf()
+    private var anonymNamesMap: MutableMap<String, String> = mutableMapOf()
     private var numOfVariables = 0
-    const val VAR_PREFIX = "v"
+    private const val VAR_PREFIX = "v"
 
     override fun apply(treeCtx: TreeContext, toStoreMetadata: Boolean) {
+        anonymNamesMap = mutableMapOf()
+        numOfVariables = 0
         val tree = treeCtx.root
         val treeIterator = tree.trees.iterator()
 
@@ -23,7 +25,7 @@ object Anonymization: Transformation {
             if (treeCtx.getTypeLabel(node) == "NameLoad") {
                 if (node.label in anonymNamesMap.keys) {
                     val newLabel = anonymNamesMap[node.label]
-                    if (toStoreMetadata) node.setMetadata(newLabel, node.label)
+                    if (toStoreMetadata) node.setMetadata(metadataKey, mutableMapOf(newLabel to node.label))
                     node.label = newLabel
                 }
 
@@ -35,7 +37,7 @@ object Anonymization: Transformation {
 
     private fun setAnonLabel(node: ITree, toStoreMetadata: Boolean) : String {
         val newLabel = "$VAR_PREFIX$numOfVariables"
-        if (toStoreMetadata) node.setMetadata(newLabel, node.label)
+        if (toStoreMetadata) node.setMetadata(metadataKey, mutableMapOf(newLabel to node.label))
         node.label = newLabel
         numOfVariables += 1
         return newLabel
@@ -48,10 +50,21 @@ object Anonymization: Transformation {
         while (treeIterator.hasNext()) {
             val node = treeIterator.next()
             if (treeCtx.getTypeLabel(node) == "NameStore") {
-                node.label = node.getMetadata(node.label) as String
+
+                node?.getMetadata(metadataKey)?.let {
+                    val nodeMap = it as? MutableMap<String, String> ?:
+                    throw IllegalArgumentException("Value with key $metadataKey should be a map")
+                    node.label = nodeMap[node.label]
+                }
             }
+
             if (treeCtx.getTypeLabel(node) == "NameLoad" && node.label in anonymNamesMap.values) {
-                node.label = node.getMetadata(node.label) as String
+
+                node?.getMetadata(metadataKey)?.let {
+                    val nodeMap = it as? MutableMap<String, String> ?:
+                    throw IllegalArgumentException("Value with key $metadataKey should be a map")
+                    node.label = nodeMap[node.label]
+                }
             }
         }
     }
