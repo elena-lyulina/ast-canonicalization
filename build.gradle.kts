@@ -24,6 +24,7 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
+
 tasks {
     compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
@@ -31,7 +32,9 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
+
     test {
+
         useJUnitPlatform()
 
         dependsOn("cleanTest")
@@ -39,5 +42,6 @@ tasks {
         testLogging {
             events("passed", "skipped", "failed")
         }
+
     }
 }
