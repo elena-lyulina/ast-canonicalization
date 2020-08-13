@@ -13,6 +13,7 @@ internal class AnonymizationTest {
         ParserSetup.checkSetup()
 
         val srcFile = javaClass.getResource("test_1.py").path
+        println(srcFile)
         val treeCtx : TreeContext = PythonTreeGenerator().generateFromFile(srcFile)
 
         Anonymization.apply(treeCtx, true)
