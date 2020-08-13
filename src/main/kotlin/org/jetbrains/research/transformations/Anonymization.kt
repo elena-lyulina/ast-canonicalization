@@ -1,6 +1,9 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package org.jetbrains.research.transformations
 
 import com.github.gumtreediff.tree.ITree
+import com.github.gumtreediff.tree.Tree
 import com.github.gumtreediff.tree.TreeContext
 
 object Anonymization: Transformation {
@@ -8,6 +11,7 @@ object Anonymization: Transformation {
     private var anonymNamesMap: MutableMap<String, String> = mutableMapOf()
     private var numOfVariables = 0
     private const val VAR_PREFIX = "v"
+
 
     override fun apply(treeCtx: TreeContext, toStoreMetadata: Boolean) {
         anonymNamesMap = mutableMapOf()

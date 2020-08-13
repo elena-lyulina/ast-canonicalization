@@ -44,10 +44,10 @@ internal class AnonymizationTest {
          */
         ParserSetup.checkSetup()
         val parentDir = "reverseApplyTests/"
-        val parameters = arrayListOf<String>("bytes_1.py", "for_1.py", "for_2.py", "simple_break_continue.py",
+        val codeExamples = arrayListOf<String>("bytes_1.py", "for_1.py", "for_2.py", "simple_break_continue.py",
         "simple_if.py", "simple_return.py", "big_test.py")
 
-        parameters.forEach {
+        codeExamples.forEach {
             val srcFile = javaClass.getResource("${parentDir}${it}").path
             val treeCtx: TreeContext = PythonTreeGenerator().generateFromFile(srcFile)
             val originalTreeContext = treeCtx.toString()
