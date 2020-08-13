@@ -15,3 +15,7 @@ RUN apt-get install -y default-jdk
 RUN apt-get install -y python3.8
 # Install PIP
 RUN apt-get install -y python3-pip && pip3 install pip --upgrade
+
+# Copying
+COPY requirements.txt /requirements.txt
+RUN pip3 install -r requirements.txt
