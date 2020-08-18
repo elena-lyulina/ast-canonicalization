@@ -27,7 +27,11 @@ object ConstantOptimizer: Transformation, NodeTransformer() {
 
     }
 
-    override fun reverseApply(treeCtx: TreeContext) {
+    override fun reverseVisit(node: ITree, treeCtx: TreeContext): ITree {
         TODO("Not yet implemented")
+    }
+
+    override fun reverseApply(treeCtx: TreeContext) {
+        treeCtx.root = reverseVisit(treeCtx.root, treeCtx)
     }
 }
