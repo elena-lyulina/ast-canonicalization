@@ -10,4 +10,6 @@ interface NodeVisitor {
 
     fun genericVisit(node: ITree, treeCtx: TreeContext)
 
+    fun genericReverseVisit(node: ITree, treeCtx: TreeContext)
+
 }

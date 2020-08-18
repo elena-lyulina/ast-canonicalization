@@ -13,6 +13,10 @@ open class NodeTransformer : NodeVisitor {
     }
 
     override fun genericVisit(node: ITree, treeCtx: TreeContext) {
-        node.children  = node.children?.map { visit(it, treeCtx) }
+        node.children = node.children?.map { visit(it, treeCtx) }
+    }
+
+    override fun genericReverseVisit(node: ITree, treeCtx: TreeContext) {
+        node.children = node.children?.map { reverseVisit(it, treeCtx) }
     }
 }
