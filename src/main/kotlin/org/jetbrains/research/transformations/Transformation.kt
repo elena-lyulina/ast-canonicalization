@@ -7,7 +7,7 @@ import com.github.gumtreediff.tree.TreeContext
  */
 interface Transformation {
 
-    abstract val metadataKey: String
+    val metadataKey: String
 
     /**
      * Applying forward transformation.
