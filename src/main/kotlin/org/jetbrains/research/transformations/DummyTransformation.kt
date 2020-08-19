@@ -18,10 +18,10 @@ class DummyTransformation: BasicTransformation() {
         get() = TODO("Not yet implemented")
 
     override fun apply(treeCtx: TreeContext, toStoreMetadata: Boolean) {
-        TODO("Not yet implemented")
+        treeCtx.root = visit(treeCtx.root, treeCtx)
     }
 
     override fun reverseApply(treeCtx: TreeContext) {
-        TODO("Not yet implemented")
+        treeCtx.root = reverseVisit(treeCtx.root, treeCtx)
     }
 }
