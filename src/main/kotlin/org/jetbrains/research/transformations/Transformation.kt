@@ -21,6 +21,6 @@ interface Transformation {
      * Applying reverse transformation.
      * @param [treeCtx] - Abstract syntax tree, built on source code.
      */
-    fun reverseApply(treeCtx: TreeContext)
+    fun inverseApply(treeCtx: TreeContext)
 
 }
