@@ -5,6 +5,7 @@ import com.github.gumtreediff.gen.python.PythonTreeGenerator
 import com.github.gumtreediff.io.TreeIoUtils
 import java.io.File
 import java.util.logging.Logger
+import org.apache.commons.io.FileUtils
 
 /**
  * [ParserSetup] class is created for parser setup before using Gumtree with python code.
@@ -22,14 +23,9 @@ object ParserSetup {
      */
     private fun putParserToTargetPath(targetPath: String= TARGET_PATH) {
 
-        try {
-            LOG.info("Putting parser into $targetPath")
-            val pythonparserFile = File(javaClass.getResource("$PARSER_NAME.py").path)
-            pythonparserFile.copyTo(File(targetPath))
-
-        } catch (e: FileAlreadyExistsException) {
-            LOG.info("Parser file is already in $TARGET_PATH")
-        }
+        LOG.info("Putting parser into $targetPath")
+        val pythonparserFile = File(javaClass.getResource("$PARSER_NAME.py").path)
+        pythonparserFile.copyTo(File(targetPath), overwrite = true)
 
     }
 
@@ -52,8 +48,9 @@ object ParserSetup {
      */
     fun checkSetup() {
         LOG.info("Checking correctness of a parser setup")
+        val pythonparserFile = File(javaClass.getResource("$PARSER_NAME.py").path)
         val targetFile = File(TARGET_PATH)
-        if (!targetFile.exists()) {
+        if (!targetFile.exists() or !FileUtils.contentEquals(pythonparserFile, targetFile)) {
             LOG.info("Parser file will be created in $TARGET_PATH")
             putParserToTargetPath()
             makeFileExecutable(targetFile)
