@@ -3,7 +3,7 @@ package org.jetbrains.research.transformations
 import com.github.gumtreediff.tree.ITree
 import com.github.gumtreediff.tree.TreeContext
 
-object ConstantOptimizer: Transformation, NodeTransformer() {
+object ConstantOptimizer: RecursiveTransformation() {
     override val metadataKey: String
         get() = TODO("Not yet implemented")
 
@@ -12,8 +12,12 @@ object ConstantOptimizer: Transformation, NodeTransformer() {
         treeCtx.root = visit(treeCtx.root, treeCtx)
     }
 
+    override fun inverseApply(treeCtx: TreeContext) {
+        treeCtx.root = inverseVisit(treeCtx.root, treeCtx)
+    }
+
     override fun visit(node: ITree, treeCtx: TreeContext): ITree {
-        super.genericVisit(node, treeCtx)
+        super.visitChildren(node, treeCtx)
 
         if (treeCtx.getTypeLabel(node) != "BinOp_Add")
             return node
@@ -27,11 +31,7 @@ object ConstantOptimizer: Transformation, NodeTransformer() {
 
     }
 
-    override fun reverseVisit(node: ITree, treeCtx: TreeContext): ITree {
+    override fun inverseVisit(node: ITree, treeCtx: TreeContext): ITree {
         TODO("Not yet implemented")
-    }
-
-    override fun reverseApply(treeCtx: TreeContext) {
-        treeCtx.root = reverseVisit(treeCtx.root, treeCtx)
     }
 }
