@@ -19,6 +19,7 @@ dependencies {
     implementation("com.github.gumtreediff", "client", "2.1.2")
     implementation("com.github.gumtreediff", "client.diff", "2.1.2")
     implementation("com.github.gumtreediff", "core", "2.1.2")
+    implementation("commons-io", "commons-io", "2.5")
 
     testImplementation("com.github.gumtreediff", "gen.python", "2.1.2")
     testImplementation(kotlin("test-junit"))
