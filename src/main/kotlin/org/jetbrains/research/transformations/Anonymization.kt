@@ -20,7 +20,10 @@ object Anonymization: Transformation {
 
     override fun apply(treeCtx: TreeContext, toStoreMetadata: Boolean) {
 
-        val anonymNamesMap: MutableMap<String, String> = mutableMapOf()
+        val anonymVarNamesMap: MutableMap<String, String> = mutableMapOf()
+        val anonymArgNamesMap: MutableMap<String, String> = mutableMapOf()
+        val anonymFunNamesMap: MutableMap<String, String> = mutableMapOf()
+
         var numOfVariables = 0
         var numOfFunctions = 0
         val tree = treeCtx.root
@@ -33,22 +36,38 @@ object Anonymization: Transformation {
             when (nodeType) {
                 // variable anonymization
                 NodeType.NAME_STORE.type -> {
-                    anonymNamesMap.getOrPut(node.label, {
+
+                    if (anonymVarNamesMap[node.label] != null) {
+                        val newLabel = anonymVarNamesMap[node.label]
+                        if (toStoreMetadata) node.setMetadata(metadataKey, mutableMapOf(newLabel to node.label))
+                        node.label = newLabel
+                    }
+
+                    anonymVarNamesMap.getOrPut(node.label, {
                         numOfVariables += 1
                         return@getOrPut(setAnonLabel(node, toStoreMetadata, NodeType.NAME_STORE.type, numOfVariables))
                     })
                 }
 
                 NodeType.NAME_LOAD.type -> {
-                    if (node.label in anonymNamesMap.keys) {
-                        val newLabel = anonymNamesMap[node.label]
+                    val parentsTypes = node.parents.map { it.label }
+//                    print("${anonymFunNamesMap.values} & $parentsTypes")
+//                    print(anonymFunNamesMap.values.intersect(parentsTypes))
+
+                    if (anonymFunNamesMap.values.intersect(parentsTypes).isNotEmpty()) {
+                        val newLabel = anonymArgNamesMap[node.label]
+                        if (toStoreMetadata) node.setMetadata(metadataKey, mutableMapOf(newLabel to node.label))
+                        node.label = newLabel
+                    }
+                    else if (node.label in anonymVarNamesMap.keys) {
+                        val newLabel = anonymVarNamesMap[node.label]
                         if (toStoreMetadata) node.setMetadata(metadataKey, mutableMapOf(newLabel to node.label))
                         node.label = newLabel
                     }
                 }
 
                 NodeType.ARG.type -> {
-                    anonymNamesMap.getOrPut(node.label, {
+                    anonymArgNamesMap.getOrPut(node.label, {
                         numOfVariables += 1
                         return@getOrPut(setAnonLabel(node, toStoreMetadata, NodeType.ARG.type, numOfVariables))
                     })
@@ -57,7 +76,7 @@ object Anonymization: Transformation {
 
                 //function anonymization
                 NodeType.FUNC_DEF.type -> {
-                    anonymNamesMap.getOrPut(node.label, {
+                    anonymFunNamesMap.getOrPut(node.label, {
                         numOfFunctions += 1
                         return@getOrPut(setAnonLabel(node, toStoreMetadata, NodeType.FUNC_DEF.type, numOfFunctions))
                     })
@@ -70,15 +89,15 @@ object Anonymization: Transformation {
         }
     }
 
-    private fun setAnonLabel(node: ITree, toStoreMetadata: Boolean, type: String, num: Int) : String {
+    private fun setAnonLabel(node: ITree, toStoreMetadata: Boolean, nodeType: String, num: Int) : String {
         var newLabel = "$num"
-        when(type) {
+        when(nodeType) {
             NodeType.FUNC_DEF.type -> { newLabel = FUN_PREFIX + newLabel }
             NodeType.NAME_STORE.type -> { newLabel = VAR_PREFIX + newLabel }
             NodeType.NAME_LOAD.type -> { newLabel = VAR_PREFIX + newLabel }
             NodeType.ARG.type -> { newLabel = VAR_PREFIX + newLabel}
         }
-//        newLabel = "$VAR_PREFIX$num"
+
         if (toStoreMetadata) node.setMetadata(metadataKey, mutableMapOf(newLabel to node.label))
         node.label = newLabel
         return newLabel
