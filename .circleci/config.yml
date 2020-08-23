@@ -1,8 +1,13 @@
 version: 2.1
+workflows:
+  build_and_deploy:
+    jobs:
+      - build
+
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:11.0.3-jdk-stretch
+      - image: rasav420/ast-canonicalization:latest
     working_directory: ~/repo
     steps:
       - checkout:
