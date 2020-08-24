@@ -5,12 +5,6 @@ package org.jetbrains.research.transformations
 import com.github.gumtreediff.tree.ITree
 import com.github.gumtreediff.tree.TreeContext
 
-enum class NodeType(val type: String) {
-    NAME_STORE("Name_Store"),
-    NAME_LOAD("Name_Load"),
-    ARG("arg"),
-    FUNC_DEF("FunctionDef")
-}
 
 object Anonymization: Transformation {
     override val metadataKey = "anonymization"
