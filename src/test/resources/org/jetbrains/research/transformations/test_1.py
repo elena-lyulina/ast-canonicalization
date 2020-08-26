@@ -1,7 +1,14 @@
-def best_fun(x, y):
-    return x + y
 
+def best_fun(x, b, n):
+    y = x
+    k = y
+    return k
 
-a = 4
-b = 5
-best_fun(a, b)
+def worst_fun(x, b, c):
+    y = x
+    k = y
+    return k
+
+a = 5
+b = 6
+print(a + b)
