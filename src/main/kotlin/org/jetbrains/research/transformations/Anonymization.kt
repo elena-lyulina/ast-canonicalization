@@ -14,7 +14,7 @@ object Anonymization: Transformation {
 
     override fun apply(treeCtx: TreeContext, toStoreMetadata: Boolean) {
 
-        val anonymVarNamesMap: MutableMap<String, Array<Pair<String, String>>> = mutableMapOf() // х -> массив([новое название, родитель])
+        val anonymVarNamesMap: MutableMap<String, Array<Pair<String, String>>> = mutableMapOf() // х -> array[(new label, parent prefix)]
         val anonymArgNamesMap: MutableMap<String, Array<Pair<String, String>>> = mutableMapOf()
         val anonymFunNamesMap: MutableMap<String, String> = mutableMapOf()
 
@@ -116,9 +116,7 @@ object Anonymization: Transformation {
                     }
 
                 }
-                // end of variable anonymization
 
-                //function anonymization
                 NodeType.FUNC_DEF.type -> {
                     anonymFunNamesMap.getOrPut(node.label, {
                         numOfFuns += 1
@@ -126,8 +124,6 @@ object Anonymization: Transformation {
                     })
                 }
             }
-
-
 
 
         }
