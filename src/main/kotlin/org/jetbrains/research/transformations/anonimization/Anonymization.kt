@@ -66,7 +66,7 @@ object Anonymization : Transformation {
             in metaInformation.anonVariablesMeta.namesMap.keys -> {
                 anonymizeVariable(node, metaInformation.anonVariablesMeta, currentPrefix, toStoreMetadata)
             }
-            in metaInformation.anonVariablesMeta.namesMap.keys -> {
+            in metaInformation.anonFunctionsMeta.namesMap.keys -> {
                 val newLabel = metaInformation.anonFunctionsMeta.namesMap[node.label]
                 newLabel?.let {
                     setAnonLabel(node, newLabel, toStoreMetadata)
@@ -76,6 +76,19 @@ object Anonymization : Transformation {
                 anonymizeVariable(node, metaInformation.anonArgumentsMeta, currentPrefix, toStoreMetadata)
             }
         }
+    }
+
+    private fun handleFuncDefinitionNode(node: ITree,
+                                         metaInformation: AnonymizationMetaInformation,
+                                         currentPrefix: String,
+                                         toStoreMetadata: Boolean) {
+        metaInformation.anonFunctionsMeta.namesMap.getOrPut(node.label, {
+            val newLabel = setAnonLabel(node, currentPrefix, toStoreMetadata,
+                    getMarkedLabel(NodeType.FUNC_DEF, metaInformation.anonFunctionsMeta.currentId))
+            metaInformation.anonFunctionsMeta.currentId += 1
+            newLabel
+        })
+
     }
 
     override fun apply(treeCtx: TreeContext, toStoreMetadata: Boolean) {
@@ -94,17 +107,11 @@ object Anonymization : Transformation {
                 NodeType.NAME_LOAD.type -> {
                     handleNameLoadNode(node, metaInformation, currentPrefix, toStoreMetadata)
                 }
-
                 NodeType.ARG.type -> {
                     initOrFindLabel(node, metaInformation.anonArgumentsMeta, currentPrefix, toStoreMetadata)
                 }
                 NodeType.FUNC_DEF.type -> {
-                    metaInformation.anonFunctionsMeta.namesMap.getOrPut(node.label, {
-                        val newLabel = setAnonLabel(node, currentPrefix, toStoreMetadata,
-                                getMarkedLabel(NodeType.FUNC_DEF, metaInformation.anonFunctionsMeta.currentId))
-                        metaInformation.anonFunctionsMeta.currentId += 1
-                        newLabel
-                    })
+                    handleFuncDefinitionNode(node, metaInformation, currentPrefix, toStoreMetadata)
                 }
             }
         }
