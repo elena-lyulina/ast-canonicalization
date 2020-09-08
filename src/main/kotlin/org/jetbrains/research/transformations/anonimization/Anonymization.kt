@@ -6,7 +6,7 @@ import com.github.gumtreediff.tree.ITree
 import com.github.gumtreediff.tree.TreeContext
 import org.jetbrains.research.transformations.NodeType
 import org.jetbrains.research.transformations.Transformation
-import org.jetbrains.research.transformations.nodes
+import org.jetbrains.research.transformations.transformAndGetNodes
 
 object Anonymization : Transformation {
     override val metadataKey = "anonymization"
@@ -49,7 +49,7 @@ object Anonymization : Transformation {
                                 currentPrefix: String,
                                 toStoreMetadata: Boolean) {
         val prefixes = anonymousConfig.getPrefixes(node)
-        if ((node.label in anonymousConfig.namesMap.keys) and (currentPrefix in prefixes)) {
+        if ((node.label in anonymousConfig.namesMap.keys) && (currentPrefix in prefixes)) {
             anonymizeVariable(node, anonymousConfig, currentPrefix, toStoreMetadata)
         } else {
             val newLabel = setAnonLabel(node, currentPrefix, toStoreMetadata,
@@ -95,7 +95,7 @@ object Anonymization : Transformation {
         val metaInformation = AnonymizationMetaInformation()
         var oldPrefix = EMPTY_PREFIX
 
-        treeCtx.nodes.forEach { node ->
+        fun anonymizeNode(node: ITree) {
             val nodeType = treeCtx.getTypeLabel(node)
             val currentPrefix = getNodeLabelPrefix(node, oldPrefix, metaInformation)
             oldPrefix = currentPrefix
@@ -115,6 +115,8 @@ object Anonymization : Transformation {
                 }
             }
         }
+
+        treeCtx.transformAndGetNodes(::anonymizeNode)
     }
 
     private fun getPrefixByNodeType(nodeType: NodeType): String {
@@ -149,9 +151,7 @@ object Anonymization : Transformation {
     }
 
     override fun inverseApply(treeCtx: TreeContext) {
-        treeCtx.nodes.forEach { node ->
-            restoreLabelName(node)
-        }
+        treeCtx.transformAndGetNodes(::restoreLabelName)
     }
 
     private fun restoreLabelName(node: ITree) {

@@ -24,7 +24,6 @@ data class AnonymousConfig(
 
 data class AnonymousFunctionsConfig(
         override var currentId: Int = 0,
-        // old_label -> new_label
         val namesMap: MutableMap<String, String> = mutableMapOf()
 ) : IdCounter
 
