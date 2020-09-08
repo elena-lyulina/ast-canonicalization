@@ -2,9 +2,8 @@ package org.jetbrains.research.transformations
 
 import ParserSetupForTests
 import com.github.gumtreediff.gen.python.PythonTreeGenerator
-import com.github.gumtreediff.tree.TreeContext
+import org.jetbrains.research.transformations.anonimization.Anonymization
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 
