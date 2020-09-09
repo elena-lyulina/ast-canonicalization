@@ -23,6 +23,7 @@ dependencies {
 
     testImplementation("com.github.gumtreediff", "gen.python", "2.1.2")
     testImplementation(kotlin("test-junit"))
+    testImplementation("net.lingala.zip4j", "zip4j", "2.6.1")
 }
 
 tasks {

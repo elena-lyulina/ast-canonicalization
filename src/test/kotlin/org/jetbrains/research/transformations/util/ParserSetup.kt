@@ -9,6 +9,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.logging.Logger
+import net.lingala.zip4j.ZipFile
 
 
 /**
@@ -47,12 +48,8 @@ object ParserSetup {
             Files.copy(file, zipFilePath, StandardCopyOption.REPLACE_EXISTING)
         }
         logger.info("Unzipping the folder with the repository")
-        ProcessBuilder()
-            .command("unzip", "-o", zipFilePath.toString(), "-d", getParserRepositoryPath())
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-            .start()
-            .waitFor()
+        val zipFile = ZipFile(zipFilePath.toString())
+        zipFile.extractAll(getParserRepositoryPath())
     }
 
     /**
@@ -79,12 +76,12 @@ object ParserSetup {
      */
     fun checkSetup(toUpdateRepository: Boolean = false) {
         logger.info("Checking correctness of a parser setup")
-        unzipParserRepo(toUpdateRepository)
         val repositoryPath = getParserRepositoryPath()
         val pythonparserFile = File("$repositoryPath/$PARSER_RELATIVE_PATH")
         val targetFile = File(TARGET_PARSER_PATH)
-        if (!targetFile.exists() || !FileUtils.contentEquals(pythonparserFile, targetFile)) {
+        if (!targetFile.exists()) {
             logger.info("Parser file will be created in $TARGET_PARSER_PATH")
+            unzipParserRepo(toUpdateRepository)
             pythonparserFile.copyTo(File(TARGET_PARSER_PATH), overwrite = true)
             makeFileExecutable(targetFile)
         }
