@@ -18,7 +18,7 @@ import java.util.logging.Logger
 object ParserSetup {
     private val logger = Logger.getLogger(javaClass.name)
 
-    private const val PARSER_REPOSITORY_ZIP_URL = "https://github.com/elena-lyulina/pythonparser/archive/master.zip"
+    private const val PARSER_REPOSITORY_ZIP_URL = "https://github.com/JetBrains-Research/pythonparser/archive/master.zip"
     private const val PARSER_ZIP_NAME = "master.zip"
 
     // Relative path in the parser repository
@@ -39,7 +39,7 @@ object ParserSetup {
      * Unzip parser repository
      * @param toUpdate - it is true, if a new version of the parser needs to download
      */
-    private fun unzipParserRepo(toUpdate: Boolean = true) {
+    private fun unzipParserRepo(toUpdate: Boolean) {
         val zipFilePath = Paths.get(javaClass.getResource(PARSER_ZIP_NAME).path)
         if (toUpdate) {
             logger.info("Updating the current master zip")
@@ -77,13 +77,13 @@ object ParserSetup {
      * Checks if parser file is in the target place and it is executable.
      * if not - makes it so.
      */
-    fun checkSetup() {
+    fun checkSetup(toUpdateRepository: Boolean = false) {
         logger.info("Checking correctness of a parser setup")
-        unzipParserRepo()
+        unzipParserRepo(toUpdateRepository)
         val repositoryPath = getParserRepositoryPath()
         val pythonparserFile = File("$repositoryPath/$PARSER_RELATIVE_PATH")
         val targetFile = File(TARGET_PARSER_PATH)
-        if (!targetFile.exists() or !FileUtils.contentEquals(pythonparserFile, targetFile)) {
+        if (!targetFile.exists() || !FileUtils.contentEquals(pythonparserFile, targetFile)) {
             logger.info("Parser file will be created in $TARGET_PARSER_PATH")
             pythonparserFile.copyTo(File(TARGET_PARSER_PATH), overwrite = true)
             makeFileExecutable(targetFile)
