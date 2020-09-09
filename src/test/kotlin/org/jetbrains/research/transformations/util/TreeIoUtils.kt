@@ -31,10 +31,14 @@ open class XMLFormatter(private val context: TreeContext, w: Writer) : TreeForma
 
     override fun startTree(tree: ITree?) {
         tree?.let {
-            if (tree.children?.size == 0)
+            if (tree.children?.size == 0) {
                 writer?.writeEmptyElement(context.getTypeLabel(tree.type))
-            else writer?.writeStartElement(tree.type.let { context.getTypeLabel(it) })
-            if (tree.hasLabel()) writer?.writeAttribute("value", tree.label)
+            } else {
+                writer?.writeStartElement(tree.type.let { context.getTypeLabel(it) })
+            }
+            if (tree.hasLabel()) {
+                writer?.writeAttribute("value", tree.label)
+            }
         }
     }
 
@@ -57,17 +61,15 @@ open class XMLFormatter(private val context: TreeContext, w: Writer) : TreeForma
 
 }
 
-object TreeIoUtils {
-    fun toXMLWithoutRoot(ctx: TreeContext) : TreeSerializer {
-        return object : TreeSerializer(ctx) {
-            @Throws(Exception::class)
-            override fun newFormatter(
-                ctx: TreeContext,
-                serializers: MetadataSerializers?,
-                writer: Writer
-            ): TreeFormatter? {
-                return XMLFormatter(ctx, writer)
-            }
+fun TreeContext.toXMLWithoutRoot(): TreeSerializer {
+    return object : TreeSerializer(this) {
+        @Throws(Exception::class)
+        override fun newFormatter(
+            ctx: TreeContext,
+            serializers: MetadataSerializers?,
+            writer: Writer
+        ): TreeFormatter? {
+            return XMLFormatter(ctx, writer)
         }
     }
 }
