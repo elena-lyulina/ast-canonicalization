@@ -1,6 +1,6 @@
 package org.jetbrains.research.transformations.util
 
-import org.apache.commons.io.FileUtils
+import com.github.gumtreediff.gen.python.PythonTreeGenerator
 import org.jetbrains.research.transformations.util.ParserSetup.checkSetup
 import java.io.File
 import java.io.InputStream
@@ -10,6 +10,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.logging.Logger
 import net.lingala.zip4j.ZipFile
+import org.jetbrains.research.transformations.util.Util.getTmpPath
 
 
 /**
@@ -17,7 +18,7 @@ import net.lingala.zip4j.ZipFile
  * Also [checkSetup] should be called before running tests.
  */
 object ParserSetup {
-    private val logger = Logger.getLogger(javaClass.name)
+    private val LOG = Logger.getLogger(javaClass.name)
 
     private const val PARSER_REPOSITORY_ZIP_URL = "https://github.com/JetBrains-Research/pythonparser/archive/master.zip"
     private const val PARSER_ZIP_NAME = "master.zip"
@@ -31,6 +32,10 @@ object ParserSetup {
 
     private val TARGET_PARSER_PATH = "${getTmpPath()}/$PARSER_NAME"
     private val TARGET_INVERSE_PARSER_PATH = "${getTmpPath()}/$INVERSE_PARSER_NAME"
+
+    fun getCommandForInverseParser(XMLPath: String): Array<String> {
+        return arrayOf("python3", TARGET_INVERSE_PARSER_PATH, XMLPath)
+    }
 
     /**
      * Get parser repository path in this project in the resources folder
@@ -47,11 +52,11 @@ object ParserSetup {
     private fun unzipParserRepo(toUpdate: Boolean) {
         val zipFilePath = Paths.get(javaClass.getResource(PARSER_ZIP_NAME).path)
         if (toUpdate) {
-            logger.info("Updating the current master zip")
+            LOG.info("Updating the current master zip")
             val file: InputStream = URL(PARSER_REPOSITORY_ZIP_URL).openStream()
             Files.copy(file, zipFilePath, StandardCopyOption.REPLACE_EXISTING)
         }
-        logger.info("Unzipping the folder with the repository")
+        LOG.info("Unzipping the folder with the repository")
         val zipFile = ZipFile(zipFilePath.toString())
         zipFile.extractAll(getParserRepositoryPath())
     }
@@ -62,16 +67,8 @@ object ParserSetup {
      * changed to "executable".
      */
     private fun makeFileExecutable(targetFile: File) {
-        logger.info("Making parser file executable")
-        val command = arrayOf("chmod", "+x", targetFile.absolutePath)
-        val builder = ProcessBuilder(*command)
-        builder.directory(targetFile.parentFile)
-        builder.start()
-    }
-
-    private fun getTmpPath(): String {
-        val tmpPath = System.getProperty("java.io.tmpdir")
-        return tmpPath.removeSuffix("/")
+        LOG.info("Making parser file executable")
+        Util.runProcessBuilder("chmod", "+x", targetFile.absolutePath)
     }
 
     /**
@@ -80,17 +77,17 @@ object ParserSetup {
      */
     private fun checkParserFile(parserFilePath: String, targetPath: String, toUpdateRepository: Boolean = false) {
         val targetFile = File(targetPath)
-        if (!targetFile.exists()) {
-            logger.info("Parser file will be created in $targetPath")
+        if (!targetFile.exists() || toUpdateRepository) {
+            LOG.info("Parser file will be created in $targetPath")
             val parserFile = File(parserFilePath)
             unzipParserRepo(toUpdateRepository)
             parserFile.copyTo(File(targetPath), overwrite = true)
             makeFileExecutable(targetFile)
         }
         else {
-            logger.info("Parser file already exists in $targetPath")
+            LOG.info("Parser file already exists in $targetPath")
         }
-        logger.info("Adding parser's path into system path")
+        LOG.info("Adding parser path into system path")
         System.setProperty("gt.pp.path", targetPath)
     }
 
@@ -98,10 +95,16 @@ object ParserSetup {
      * Check if pythonparer and inverse parser files is valid
      */
     fun checkSetup(toUpdateRepository: Boolean = false) {
-        logger.info("Checking correctness of a parser setup")
+        LOG.info("Checking correctness of a parser setup")
         val repositoryPath = getParserRepositoryPath()
 
         checkParserFile("$repositoryPath/$PARSER_RELATIVE_PATH", TARGET_PARSER_PATH, toUpdateRepository)
         checkParserFile("$repositoryPath/$INVERSE_PARSER_RELATIVE_PATH", TARGET_INVERSE_PARSER_PATH, toUpdateRepository)
     }
+}
+
+fun main() {
+    val srcFile = "/Users/Anastasiia.Birillo/PycharmProjects/pythonparser/src/main/python/pythonparser/test.py"
+    println(srcFile)
+    val treeCtx = PythonTreeGenerator().generateFromFile(srcFile)
 }
