@@ -48,18 +48,23 @@ object ParserSetup {
     }
 
     /**
-     * Unzip parser repository
+     * Update parser repository
      * @param toUpdate - it is true, if a new version of the parser needs to download
      */
-    private fun unzipParserRepo(toUpdate: Boolean) {
+    private fun updateParserRepo(toUpdate: Boolean) {
         val zipFilePath = Paths.get("${getParserRepositoryPath()}/$PARSER_ZIP_NAME")
         if (toUpdate) {
             LOG.info("Updating the current master zip")
             val file: InputStream = URL(PARSER_REPOSITORY_ZIP_URL).openStream()
             Files.copy(file, zipFilePath, StandardCopyOption.REPLACE_EXISTING)
         }
+        unzipParserRepo()
+    }
+
+    private fun unzipParserRepo(zipParserRepoPath: String
+                                = Paths.get("${getParserRepositoryPath()}/$PARSER_ZIP_NAME").toString()) {
         LOG.info("Unzipping the folder with the repository")
-        val zipFile = ZipFile(zipFilePath.toString())
+        val zipFile = ZipFile(zipParserRepoPath)
         val parserRepositoryPath = getParserRepositoryPath()
         zipFile.extractAll(parserRepositoryPath)
     }
@@ -84,7 +89,7 @@ object ParserSetup {
         if (!targetFile.exists() || toUpdateRepository) {
             LOG.info("Parser file will be created in $targetPath")
             val parserFile = File(parserFilePath)
-            unzipParserRepo(toUpdateRepository)
+            updateParserRepo(toUpdateRepository)
             parserFile.copyTo(File(targetPath), overwrite = true)
             makeFileExecutable(targetFile)
         }
@@ -97,12 +102,20 @@ object ParserSetup {
         }
     }
 
+    private fun isParserRepositoryRootFolderExist() : Boolean {
+        val repoFolder = File("${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER")
+        return repoFolder.exists()
+    }
+
     /*
      * Check if pythonparser and inverse parser files is valid
      */
     fun checkSetup(toUpdateRepository: Boolean = false) {
         LOG.info("Checking correctness of a parser setup")
         val repositoryPath = getParserRepositoryPath()
+        if (!isParserRepositoryRootFolderExist()) {
+            unzipParserRepo()
+        }
         checkParserFile("$repositoryPath/$PARSER_RELATIVE_PATH", TARGET_PARSER_PATH, toUpdateRepository)
     }
 }
