@@ -24,9 +24,13 @@ object ParserSetup {
 
     // Relative path in the parser repository
     private const val PARSER_RELATIVE_PATH = "pythonparser-master/src/main/python/pythonparser/pythonparser_3.py"
+    private const val INVERSE_PARSER_RELATIVE_PATH = "pythonparser-master/src/main/python/inverse_parser/inverse_parser_3.py"
 
     private const val PARSER_NAME = "pythonparser"
+    private const val INVERSE_PARSER_NAME = "inverse_parser_3.py"
+
     private val TARGET_PARSER_PATH = "${getTmpPath()}/$PARSER_NAME"
+    private val TARGET_INVERSE_PARSER_PATH = "${getTmpPath()}/$INVERSE_PARSER_NAME"
 
     /**
      * Get parser repository path in this project in the resources folder
@@ -71,24 +75,33 @@ object ParserSetup {
     }
 
     /**
-     * Checks if parser file is in the target place and it is executable.
+     * Check if parser file is in the target place and it is executable.
      * if not - makes it so.
+     */
+    private fun checkParserFile(parserFilePath: String, targetPath: String, toUpdateRepository: Boolean = false) {
+        val targetFile = File(targetPath)
+        if (!targetFile.exists()) {
+            logger.info("Parser file will be created in $targetPath")
+            val parserFile = File(parserFilePath)
+            unzipParserRepo(toUpdateRepository)
+            parserFile.copyTo(File(targetPath), overwrite = true)
+            makeFileExecutable(targetFile)
+        }
+        else {
+            logger.info("Parser file already exists in $targetPath")
+        }
+        logger.info("Adding parser's path into system path")
+        System.setProperty("gt.pp.path", targetPath)
+    }
+
+    /*
+     * Check if pythonparer and inverse parser files is valid
      */
     fun checkSetup(toUpdateRepository: Boolean = false) {
         logger.info("Checking correctness of a parser setup")
         val repositoryPath = getParserRepositoryPath()
-        val pythonparserFile = File("$repositoryPath/$PARSER_RELATIVE_PATH")
-        val targetFile = File(TARGET_PARSER_PATH)
-        if (!targetFile.exists()) {
-            logger.info("Parser file will be created in $TARGET_PARSER_PATH")
-            unzipParserRepo(toUpdateRepository)
-            pythonparserFile.copyTo(File(TARGET_PARSER_PATH), overwrite = true)
-            makeFileExecutable(targetFile)
-        }
-        else {
-            logger.info("Parser file already exists in $TARGET_PARSER_PATH")
-        }
-        logger.info("Adding pythonparser's path into system path")
-        System.setProperty("gt.pp.path", TARGET_PARSER_PATH)
+
+        checkParserFile("$repositoryPath/$PARSER_RELATIVE_PATH", TARGET_PARSER_PATH, toUpdateRepository)
+        checkParserFile("$repositoryPath/$INVERSE_PARSER_RELATIVE_PATH", TARGET_INVERSE_PARSER_PATH, toUpdateRepository)
     }
 }
