@@ -22,7 +22,9 @@ dependencies {
     implementation("commons-io", "commons-io", "2.5")
 
     testImplementation("com.github.gumtreediff", "gen.python", "2.1.2")
-    testImplementation(kotlin("test-junit"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.0.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
     testImplementation("net.lingala.zip4j", "zip4j", "2.6.1")
 }
 

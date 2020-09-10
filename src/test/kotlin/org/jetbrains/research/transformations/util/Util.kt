@@ -1,20 +1,21 @@
 package org.jetbrains.research.transformations.util
 
-import com.github.gumtreediff.gen.python.PythonTreeGenerator
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
+import java.util.logging.Logger
 
 
 object Util {
 
-     /*
-      * Run ProcessBuilder and return output
-      */
-     fun runProcessBuilder(vararg command: String): String {
-         val builder = ProcessBuilder(*command)
-         builder.redirectErrorStream(true)
-         val p = builder.start()
-         return BufferedReader(InputStreamReader(p.inputStream)).readLines().joinToString(separator = "\n") { it }
+    /*
+     * Run ProcessBuilder and return output
+     */
+    fun runProcessBuilder(vararg command: String): String {
+        val builder = ProcessBuilder(*command)
+        builder.redirectErrorStream(true)
+        val p = builder.start()
+        return BufferedReader(InputStreamReader(p.inputStream)).readLines().joinToString(separator = "\n") { it }
     }
 
     fun getTmpPath(): String {
@@ -22,11 +23,8 @@ object Util {
         return tmpPath.removeSuffix("/")
     }
 
-}
+    fun getContentFromFile(file: File): String {
+        return file.readLines().joinToString(separator = "\n") { it }
+    }
 
-fun main() {
-    ParserSetup.checkSetup()
-    val srcFile = "/Users/Anastasiia.Birillo/PycharmProjects/pythonparser/src/main/python/pythonparser/test.py"
-    println(srcFile)
-    val treeCtx = PythonTreeGenerator().generateFromFile(srcFile)
 }

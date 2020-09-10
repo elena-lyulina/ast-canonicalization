@@ -24,16 +24,18 @@ object ParserSetup {
     private const val PARSER_ZIP_NAME = "master.zip"
 
     // Relative path in the parser repository
-    private const val PARSER_RELATIVE_PATH = "pythonparser-master/src/main/python/pythonparser/pythonparser_3.py"
-    private const val INVERSE_PARSER_RELATIVE_PATH = "pythonparser-master/src/main/python/inverse_parser"
+    private const val REPOSITORY_ROOT_FOLDER = "pythonparser-master"
+    private const val PARSER_RELATIVE_PATH = "$REPOSITORY_ROOT_FOLDER/src/main/python/pythonparser/pythonparser_3.py"
+    private const val INVERSE_PARSER_RELATIVE_PATH = "$REPOSITORY_ROOT_FOLDER/src/main/python/inverse_parser/inverse_parser_3.py"
 
     private const val PARSER_NAME = "pythonparser"
 
     private val TARGET_PARSER_PATH = "${getTmpPath()}/$PARSER_NAME"
-    private val TARGET_INVERSE_PARSER_PATH = getParserRepositoryPath()
+    private val TARGET_INVERSE_PARSER_PATH = "${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH"
 
     fun getCommandForInverseParser(XMLPath: String): Array<String> {
-        return arrayOf("python3", TARGET_INVERSE_PARSER_PATH, XMLPath)
+        return arrayOf("cd", "${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER", "&&",
+            "python3", TARGET_INVERSE_PARSER_PATH, XMLPath)
     }
 
     /**
