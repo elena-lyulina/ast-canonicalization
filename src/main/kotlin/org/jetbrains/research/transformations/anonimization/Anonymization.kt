@@ -16,8 +16,14 @@ object Anonymization : Transformation {
     private const val EMPTY_PREFIX = ""
     private const val SEPARATOR = "_"
 
-    // Check if the node has the parent function and get its name
-    // Otherwise return EMPTY_PREFIX
+    /* Check if the node has the parent function and get its name
+     * Otherwise return EMPTY_PREFIX
+     *
+     * The parent function means the function where the variable or the function argument is defined.
+     * We should find the parent function because we want to transform the X variable from the FUN1 into F1_V1
+     * not simple V1. If the parent functions list if empty it is the variable from the main block and
+     * we should not add a new prefix
+     */
     private fun getNodeLabelPrefix(node: ITree, oldPrefix: String,
                                    metaInformation: AnonymizationMetaInformation): String {
         var prefix = EMPTY_PREFIX
@@ -26,7 +32,25 @@ object Anonymization : Transformation {
             prefix = parentFunctions[0] + SEPARATOR
         }
         if (oldPrefix != prefix) {
-            // Reset ids
+            /* Reset ids for each new function
+               def fun1 (x):
+                   x = x + 1
+                   return x
+
+                def fun2 (x):
+                    x = x + 2
+                    return x
+
+              * is transformed into
+
+                 def f1 (f1_a1):
+                        f1_v1 = f1_a1 + 1
+                        return f1_v1
+
+                 def f2 (f2_a1):
+                        f2_v1 = f2_a1 + 2
+                        return f2_v1
+             */
             metaInformation.anonVariablesMeta.currentId = 0
             metaInformation.anonArgumentsMeta.currentId = 0
         }

@@ -1,8 +1,5 @@
 package org.jetbrains.research.transformations.util
 
-import com.github.gumtreediff.gen.Generators
-import com.github.gumtreediff.gen.python.PythonTreeGenerator
-import com.github.gumtreediff.io.TreeIoUtils
 import java.io.File
 import java.util.logging.Logger
 
