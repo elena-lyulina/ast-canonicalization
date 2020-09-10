@@ -10,10 +10,12 @@ import java.util.logging.Logger
 open class PythonTransformationsTest {
     protected val LOG = Logger.getLogger(javaClass.name)
 
+    protected val XMLTreeFileName = "${Util.getTmpPath()}/test.xml"
+
     @BeforeAll
     internal fun beforeAll() {
         LOG.info("beforeAll called")
-        ParserSetup.checkSetup(true)
+        ParserSetup.checkSetup()
     }
 
     protected fun getSourcePythonCode(ctx: TreeContext, XMLDstPath: String): String {

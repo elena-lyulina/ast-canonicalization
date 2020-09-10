@@ -1,5 +1,6 @@
 package org.jetbrains.research.transformations.util
 
+import com.github.gumtreediff.gen.python.PythonTreeGenerator
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -21,4 +22,11 @@ object Util {
         return tmpPath.removeSuffix("/")
     }
 
+}
+
+fun main() {
+    ParserSetup.checkSetup()
+    val srcFile = "/Users/Anastasiia.Birillo/PycharmProjects/pythonparser/src/main/python/pythonparser/test.py"
+    println(srcFile)
+    val treeCtx = PythonTreeGenerator().generateFromFile(srcFile)
 }
