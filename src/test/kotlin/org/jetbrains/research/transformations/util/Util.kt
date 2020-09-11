@@ -11,8 +11,9 @@ object Util {
     /*
      * Run ProcessBuilder and return output
      */
-    fun runProcessBuilder(vararg command: String): String {
+    fun runProcessBuilder(vararg command: String, runningDirectory: String?): String {
         val builder = ProcessBuilder(*command)
+        runningDirectory?.let { builder.directory(File(it)) }
         builder.redirectErrorStream(true)
         val p = builder.start()
         return BufferedReader(InputStreamReader(p.inputStream)).readLines().joinToString(separator = "\n") { it }

@@ -35,11 +35,8 @@ object ParserSetup {
     private val TARGET_PARSER_PATH = "${getTmpPath()}/$PARSER_NAME"
     private val TARGET_INVERSE_PARSER_PATH = "${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH"
 
-    fun getCommandForInverseParser(XMLPath: String): Array<String> {
-        return arrayOf(
-            "cd", getInverseParserFolderPath(), "&&",
-            "python3", TARGET_INVERSE_PARSER_PATH, XMLPath
-        )
+    fun getCommandForInverseParser(XMLPath: String): Pair<Array<String>, String> {
+        return Pair(arrayOf("python3", TARGET_INVERSE_PARSER_PATH, XMLPath), getInverseParserFolderPath())
     }
 
     private fun getInverseParserFolderPath() =
@@ -85,7 +82,7 @@ object ParserSetup {
      */
     private fun makeFileExecutable(targetFile: File) {
         LOG.info("Making parser file executable")
-        runProcessBuilder("chmod", "+x", targetFile.absolutePath)
+        runProcessBuilder("chmod", "+x", targetFile.absolutePath, runningDirectory = null)
     }
 
     /**
