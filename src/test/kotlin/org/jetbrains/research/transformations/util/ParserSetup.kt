@@ -20,13 +20,15 @@ import org.jetbrains.research.transformations.util.Util.runProcessBuilder
 object ParserSetup {
     private val LOG = Logger.getLogger(javaClass.name)
 
-    private const val PARSER_REPOSITORY_ZIP_URL = "https://github.com/JetBrains-Research/pythonparser/archive/master.zip"
+    private const val PARSER_REPOSITORY_ZIP_URL =
+        "https://github.com/JetBrains-Research/pythonparser/archive/master.zip"
     private const val PARSER_ZIP_NAME = "master.zip"
 
     // Relative path in the parser repository
     private const val REPOSITORY_ROOT_FOLDER = "pythonparser-master"
     private const val PARSER_RELATIVE_PATH = "$REPOSITORY_ROOT_FOLDER/src/main/python/pythonparser/pythonparser_3.py"
-    private const val INVERSE_PARSER_RELATIVE_PATH = "$REPOSITORY_ROOT_FOLDER/src/main/python/inverse_parser/inverse_parser_3.py"
+    private const val INVERSE_PARSER_RELATIVE_PATH =
+        "$REPOSITORY_ROOT_FOLDER/src/main/python/inverse_parser/inverse_parser_3.py"
 
     private const val PARSER_NAME = "pythonparser"
 
@@ -34,9 +36,14 @@ object ParserSetup {
     private val TARGET_INVERSE_PARSER_PATH = "${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH"
 
     fun getCommandForInverseParser(XMLPath: String): Array<String> {
-        return arrayOf("cd", "${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER", "&&",
-            "python3", TARGET_INVERSE_PARSER_PATH, XMLPath)
+        return arrayOf(
+            "cd", getInverseParserFolderPath(), "&&",
+            "python3", TARGET_INVERSE_PARSER_PATH, XMLPath
+        )
     }
+
+    private fun getInverseParserFolderPath() =
+        Paths.get(javaClass.getResource(INVERSE_PARSER_RELATIVE_PATH).path).parent.toString()
 
     /**
      * Get parser repository path in this project in the resources folder
@@ -61,8 +68,10 @@ object ParserSetup {
         unzipParserRepo()
     }
 
-    private fun unzipParserRepo(zipParserRepoPath: String
-                                = Paths.get("${getParserRepositoryPath()}/$PARSER_ZIP_NAME").toString()) {
+    private fun unzipParserRepo(
+        zipParserRepoPath: String
+        = Paths.get("${getParserRepositoryPath()}/$PARSER_ZIP_NAME").toString()
+    ) {
         LOG.info("Unzipping the folder with the repository")
         val zipFile = ZipFile(zipParserRepoPath)
         val parserRepositoryPath = getParserRepositoryPath()
@@ -83,8 +92,10 @@ object ParserSetup {
      * Check if parser file is in the target place and it is executable.
      * if not - makes it so.
      */
-    private fun checkParserFile(parserFilePath: String, targetPath: String, toUpdateRepository: Boolean = false,
-                                toAddIntoSystemPath: Boolean = true) {
+    private fun checkParserFile(
+        parserFilePath: String, targetPath: String, toUpdateRepository: Boolean = false,
+        toAddIntoSystemPath: Boolean = true
+    ) {
         val targetFile = File(targetPath)
         if (!targetFile.exists() || toUpdateRepository) {
             LOG.info("Parser file will be created in $targetPath")
@@ -92,8 +103,7 @@ object ParserSetup {
             updateParserRepo(toUpdateRepository)
             parserFile.copyTo(File(targetPath), overwrite = true)
             makeFileExecutable(targetFile)
-        }
-        else {
+        } else {
             LOG.info("Parser file already exists in $targetPath")
         }
         if (toAddIntoSystemPath) {
@@ -102,7 +112,7 @@ object ParserSetup {
         }
     }
 
-    private fun isParserRepositoryRootFolderExist() : Boolean {
+    private fun isParserRepositoryRootFolderExist(): Boolean {
         val repoFolder = File("${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER")
         return repoFolder.exists()
     }
