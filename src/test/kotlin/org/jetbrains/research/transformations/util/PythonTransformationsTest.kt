@@ -28,7 +28,7 @@ open class PythonTransformationsTest {
     @BeforeAll
     internal fun beforeAll() {
         LOG.info("beforeAll called")
-        ParserSetup.checkSetup(true)
+        ParserSetup.checkSetup()
     }
 
     protected fun getSourcePythonCode(ctx: TreeContext, XMLDstPath: String): String {
