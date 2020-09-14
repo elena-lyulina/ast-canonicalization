@@ -52,12 +52,8 @@ object ParserSetup {
         )
     }
 
-
     private fun getRepositoryRootPath() =
-        Paths.get(javaClass.getResource(REPOSITORY_ROOT_FOLDER).path).toString()
-
-    private fun getInverseParserDir() =
-        Paths.get(javaClass.getResource(INVERSE_PARSER_RELATIVE_PATH).path).parent.toString()
+        "${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER"
 
 
     /**
