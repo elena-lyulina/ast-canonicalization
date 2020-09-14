@@ -55,7 +55,6 @@ object ParserSetup {
     private fun getRepositoryRootPath() =
         "${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER"
 
-
     /**
      * Get parser repository path in this project in the resources folder
      */

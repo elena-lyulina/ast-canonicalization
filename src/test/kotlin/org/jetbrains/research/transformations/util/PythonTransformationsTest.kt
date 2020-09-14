@@ -1,16 +1,13 @@
 import com.github.gumtreediff.gen.python.PythonTreeGenerator
 import com.github.gumtreediff.tree.TreeContext
-import org.jetbrains.research.transformations.Transformation
 import org.jetbrains.research.transformations.util.ParserSetup
 import org.jetbrains.research.transformations.util.Util
 import org.jetbrains.research.transformations.util.toXMLWithoutRoot
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.util.logging.Logger
-import java.util.stream.Stream
 import kotlin.reflect.KFunction
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
