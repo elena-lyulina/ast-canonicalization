@@ -1,1 +1,0 @@
-a = {i for i in range(5, 100, 3) if i % 4 == 0}

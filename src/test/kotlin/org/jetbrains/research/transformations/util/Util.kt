@@ -23,6 +23,12 @@ object Util {
         return BufferedReader(InputStreamReader(p.inputStream)).readLines().joinToString(separator = "\n") { it }
     }
 
+    fun getPython3Path(): String {
+        val builder = ProcessBuilder("which", "python3")
+        val p = builder.start()
+        return BufferedReader(InputStreamReader(p.inputStream)).readLines().joinToString(separator = "\n") { it }
+    }
+
     fun getTmpPath(): String {
         val tmpPath = System.getProperty("java.io.tmpdir")
         return tmpPath.removeSuffix("/")

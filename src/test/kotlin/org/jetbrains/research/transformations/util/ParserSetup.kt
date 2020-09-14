@@ -9,6 +9,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.logging.Logger
 import net.lingala.zip4j.ZipFile
+import org.jetbrains.research.transformations.util.Util.getPython3Path
 import org.jetbrains.research.transformations.util.Util.getTmpPath
 import org.jetbrains.research.transformations.util.Util.runProcessBuilder
 
@@ -42,7 +43,7 @@ object ParserSetup {
 //      TODO: It may not work for Windows, fix it
 //        return Command(listOf("/bin/bash", "-c", "$(/usr/bin/env python3)"), getRepositoryRootPath())
 //        return Command(listOf("which", "python3"), getRepositoryRootPath())
-        return Command(listOf("/usr/bin/python3", TARGET_INVERSE_PARSER_PATH, XMLPath), getInverseParserDir())
+        return Command(listOf(getPython3Path(), TARGET_INVERSE_PARSER_PATH, XMLPath), getInverseParserDir())
 //        return Command(listOf("/bin/bash", "-c", "/usr/bin/python3 $TARGET_INVERSE_PARSER_PATH $XMLPath"), getInverseParserDir(), mapOf("PYTHONPATH" to "${getRepositoryRootPath()}:${getInverseParserDir()}"))
     }
 
