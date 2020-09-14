@@ -2,27 +2,20 @@
 
 # Copyright (c) Aniskov N.
 
-import sys
+
 import argparse
 import ast
 import logging
 import xml.etree.ElementTree as ET
-import os
 
 import astor
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname((__file__))))))
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname((__file__)))))))
-print(sys.path)
-
-import src.main.python.inverse_parser
 from src.main.python.inverse_parser._node_restorer import _NodeRestorer
 from src.main.util.const import LOGGER_NAME
 from src.main.util.file_util import get_content_from_file, create_file
 from src.main.util.log_util import log_and_raise_error
 
 logger = logging.getLogger(LOGGER_NAME)
-
 
 
 class InverseParser:

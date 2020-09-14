@@ -12,7 +12,6 @@ object Util {
      */
     fun runProcessBuilder(command: List<String>, runningDirectory: String? = null, variables: Map<String, String>? = null): String {
         val builder = ProcessBuilder(command)
-        val envs: MutableMap<String, String> = builder.environment()
         variables?.let {
             val environment = builder.environment()
             variables.entries.forEach { e -> environment[e.key] = e.value }

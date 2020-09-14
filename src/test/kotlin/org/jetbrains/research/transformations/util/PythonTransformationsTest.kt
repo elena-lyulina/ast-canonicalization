@@ -35,9 +35,9 @@ open class PythonTransformationsTest {
         val treeSerializer = ctx.toXMLWithoutRoot()
         treeSerializer.writeTo(XMLDstPath)
         val (command, runningDirectory, variables) = ParserSetup.getCommandForInverseParser(XMLDstPath)
-        println(runningDirectory)
-        println(command.joinToString(" "))
-        println(variables)
+//        println(runningDirectory)
+//        println(command.joinToString(" "))
+//        println(variables)
         return Util.runProcessBuilder(command, runningDirectory, variables)
     }
 

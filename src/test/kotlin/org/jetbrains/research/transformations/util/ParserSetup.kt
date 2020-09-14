@@ -42,7 +42,7 @@ object ParserSetup {
 //      TODO: It may not work for Windows, fix it
 //        return Command(listOf("/bin/bash", "-c", "$(/usr/bin/env python3)"), getRepositoryRootPath())
 //        return Command(listOf("which", "python3"), getRepositoryRootPath())
-        return Command(listOf("/usr/bin/python3", TARGET_INVERSE_PARSER_PATH, XMLPath), getInverseParserDir())
+        return Command(listOf("/usr/bin/python3", TARGET_INVERSE_PARSER_PATH, XMLPath), getInverseParserDir(), mapOf("PYTHONPATH" to getRepositoryRootPath()))
 //        return Command(listOf("/bin/bash", "-c", "/usr/bin/python3 $TARGET_INVERSE_PARSER_PATH $XMLPath"), getInverseParserDir(), mapOf("PYTHONPATH" to "${getRepositoryRootPath()}:${getInverseParserDir()}"))
     }
 
