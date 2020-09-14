@@ -3,6 +3,7 @@ package org.jetbrains.research.transformations
 import PythonTransformationsTest
 import com.github.gumtreediff.gen.python.PythonTreeGenerator
 import com.github.gumtreediff.tree.TreeContext
+import org.jetbrains.research.transformations.util.ParserSetup
 import org.jetbrains.research.transformations.util.Util
 import org.junit.jupiter.api.Test
 
@@ -25,7 +26,7 @@ internal class PythonTransformationSetupTest: PythonTransformationsTest() {
     fun checkInverseParserSetup() {
         val treeCtx = getTreeContext()
         // Todo: Find a better way?
-//        println("code: ${getSourcePythonCode(treeCtx, XMLTreeFileName)}")
+        println("code: ${getSourcePythonCode(treeCtx, XMLTreeFileName)}")
         assert(!getSourcePythonCode(treeCtx, XMLTreeFileName).contains("Error"))
     }
 
