@@ -9,7 +9,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.logging.Logger
 import net.lingala.zip4j.ZipFile
-import org.jetbrains.research.transformations.util.Util.getPython3Path
+import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.research.transformations.util.Util.getTmpPath
 import org.jetbrains.research.transformations.util.Util.runProcessBuilder
 
@@ -20,6 +20,9 @@ import org.jetbrains.research.transformations.util.Util.runProcessBuilder
  */
 object ParserSetup {
     private val LOG = Logger.getLogger(javaClass.name)
+
+    private const val PYTHON3_PROPERTY = "ac.p3.path"
+    private const val PYTHONPARSER_PROPERTY = "gt.pp.path"
 
     private const val PARSER_REPOSITORY_ZIP_URL =
         "https://github.com/JetBrains-Research/pythonparser/archive/master.zip"
@@ -36,14 +39,21 @@ object ParserSetup {
     private val TARGET_PARSER_PATH = "${getTmpPath()}/$PARSER_NAME"
     private val TARGET_INVERSE_PARSER_PATH = "${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH"
 
-    data class Command(val command: List<String>, val directory: String?, val variables: Map<String, String>? = null)
-
-    fun getCommandForInverseParser(XMLPath: String): Command {
-        return Command(listOf(getPython3Path(), TARGET_INVERSE_PARSER_PATH, XMLPath), getInverseParserDir())
+    /**
+     * Runs inverse_parser_3 using python3, which it gets from [PYTHON3_PROPERTY] or sets the default one
+     * To set [PYTHON3_PROPERTY], please, add -P[PYTHON3_PROPERTY]=/path/to/python3 to the command line
+     */
+    fun getCommandForInverseParser(XMLPath: String): Util.Command {
+        val defaultPythonBin = if (SystemUtils.IS_OS_WINDOWS) "where python3" else "which python3"
+        val pythonBin = System.getProperty(PYTHON3_PROPERTY)?.let { "echo $it" } ?: defaultPythonBin
+        return Util.Command(
+            listOf("/bin/bash", "-c", "$($pythonBin) $TARGET_INVERSE_PARSER_PATH $XMLPath"),
+            environment = mapOf("PYTHONPATH" to getRepositoryRootPath())
+        )
     }
 
-    private fun getInverseParserDir() =
-        Paths.get("${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH").parent.toString()
+    private fun getRepositoryRootPath() =
+        "${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER"
 
     /**
      * Get parser repository path in this project in the resources folder
@@ -85,7 +95,7 @@ object ParserSetup {
      */
     private fun makeFileExecutable(targetFile: File) {
         LOG.info("Making parser file executable")
-        runProcessBuilder(listOf("chmod", "+x", targetFile.absolutePath))
+        runProcessBuilder(Util.Command(listOf("chmod", "+x", targetFile.absolutePath)))
     }
 
     /**
@@ -108,7 +118,7 @@ object ParserSetup {
         }
         if (toAddIntoSystemPath) {
             LOG.info("Adding parser path into system path")
-            System.setProperty("gt.pp.path", targetPath)
+            System.setProperty(PYTHONPARSER_PROPERTY, targetPath)
         }
     }
 

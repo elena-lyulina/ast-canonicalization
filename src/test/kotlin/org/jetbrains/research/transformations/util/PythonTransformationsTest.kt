@@ -31,8 +31,7 @@ open class PythonTransformationsTest {
     protected fun getSourcePythonCode(ctx: TreeContext, XMLDstPath: String): String {
         val treeSerializer = ctx.toXMLWithoutRoot()
         treeSerializer.writeTo(XMLDstPath)
-        val (command, runningDirectory) = ParserSetup.getCommandForInverseParser(XMLDstPath)
-        return Util.runProcessBuilder(command, runningDirectory)
+        return Util.runProcessBuilder(ParserSetup.getCommandForInverseParser(XMLDstPath))
     }
 
     protected fun transformCode(inFile: File, outFile: File, transformation: (TreeContext, Boolean) -> Unit){

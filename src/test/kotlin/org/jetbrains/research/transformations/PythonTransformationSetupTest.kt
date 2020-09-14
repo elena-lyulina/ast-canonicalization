@@ -26,5 +26,4 @@ internal class PythonTransformationSetupTest: PythonTransformationsTest() {
         // Todo: Find a better way?
         assert(!getSourcePythonCode(treeCtx, XMLTreeFileName).contains("Error"))
     }
-
 }
