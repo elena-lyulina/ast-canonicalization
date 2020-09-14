@@ -22,7 +22,7 @@ object ParserSetup {
     private val LOG = Logger.getLogger(javaClass.name)
 
     private const val PYTHON3_PROPERTY = "ac.p3.path"
-    private const val PYTHONPARSER_PROPERY = "gt.pp.path"
+    private const val PYTHONPARSER_PROPERTY = "gt.pp.path"
 
     private const val PARSER_REPOSITORY_ZIP_URL =
         "https://github.com/JetBrains-Research/pythonparser/archive/master.zip"
@@ -48,7 +48,7 @@ object ParserSetup {
         val pythonBin = System.getProperty(PYTHON3_PROPERTY)?.let { "echo $it" } ?: defaultPythonBin
         return Util.Command(
             listOf("/bin/bash", "-c", "$($pythonBin) $TARGET_INVERSE_PARSER_PATH $XMLPath"),
-            variables = mapOf("PYTHONPATH" to getRepositoryRootPath())
+            environment = mapOf("PYTHONPATH" to getRepositoryRootPath())
         )
     }
 
@@ -119,7 +119,7 @@ object ParserSetup {
         }
         if (toAddIntoSystemPath) {
             LOG.info("Adding parser path into system path")
-            System.setProperty(PYTHONPARSER_PROPERY, targetPath)
+            System.setProperty(PYTHONPARSER_PROPERTY, targetPath)
         }
     }
 

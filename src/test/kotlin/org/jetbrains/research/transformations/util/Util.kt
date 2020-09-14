@@ -7,14 +7,20 @@ import java.io.InputStreamReader
 
 object Util {
 
-    data class Command(val command: List<String>, val directory: String? = null, val variables: Map<String, String>? = null)
+    /**
+     * Represents a command passed to the [ProcessBuilder], where
+     * [command] is a command to run (see [ProcessBuilder.command]),
+     * [directory] is a working directory (see [ProcessBuilder.directory]),
+     * and [environment] contains environment variables (see [ProcessBuilder.environment]).
+     */
+    data class Command(val command: List<String>, val directory: String? = null, val environment: Map<String, String>? = null)
 
     /*
      * Run ProcessBuilder and return output
      */
     fun runProcessBuilder(command: Command): String {
         val builder = ProcessBuilder(command.command)
-        command.variables?.let {
+        command.environment?.let {
             val environment = builder.environment()
             it.entries.forEach { e -> environment[e.key] = e.value }
         }
