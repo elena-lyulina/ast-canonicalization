@@ -1,1 +1,0 @@
-print((True and not (True and False)) or not False)
