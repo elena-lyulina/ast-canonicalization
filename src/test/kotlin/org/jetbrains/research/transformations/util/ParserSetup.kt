@@ -39,21 +39,11 @@ object ParserSetup {
     data class Command(val command: List<String>, val directory: String?, val variables: Map<String, String>? = null)
 
     fun getCommandForInverseParser(XMLPath: String): Command {
-//      We need to set the full path to the python3 to make ProcessBuilder work
-//      TODO: It may not work for Windows, fix it
-//        return Command(listOf("/bin/bash", "-c", "$(/usr/bin/env python3)"), getRepositoryRootPath())
-//        return Command(listOf("which", "python3"), getRepositoryRootPath())
         return Command(listOf(getPython3Path(), TARGET_INVERSE_PARSER_PATH, XMLPath), getInverseParserDir())
-//        return Command(listOf("/bin/bash", "-c", "/usr/bin/python3 $TARGET_INVERSE_PARSER_PATH $XMLPath"), getInverseParserDir(), mapOf("PYTHONPATH" to "${getRepositoryRootPath()}:${getInverseParserDir()}"))
     }
 
-
-    private fun getRepositoryRootPath() =
-        Paths.get(javaClass.getResource(REPOSITORY_ROOT_FOLDER).path).toString()
-
     private fun getInverseParserDir() =
-        Paths.get(javaClass.getResource(INVERSE_PARSER_RELATIVE_PATH).path).parent.toString()
-
+        Paths.get("${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH").parent.toString()
 
     /**
      * Get parser repository path in this project in the resources folder
