@@ -6,6 +6,7 @@ import com.github.gumtreediff.tree.TreeContext
 import org.jetbrains.research.transformations.util.Util.getContentFromFile
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.io.File
 
 /*
@@ -20,7 +21,7 @@ internal class PythonTransformationSetupTest: PythonTransformationsTest() {
 
     @Test
     fun checkParserSetup() {
-        getTreeContext()
+        assertDoesNotThrow(::getTreeContext)
     }
 
     @Test
