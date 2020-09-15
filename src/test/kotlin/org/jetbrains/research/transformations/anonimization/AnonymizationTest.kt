@@ -35,7 +35,10 @@ internal class AnonymizationTest : PythonTransformationsTest() {
     @ParameterizedTest(name = "Inverse apply anonymization test")
     @MethodSource("getResourceFolder")
     fun inverseApplyAnonymizationTests(outFile: File, inFile: File) {
-        transformCode(inFile, outFile) { ctx: TreeContext, _: Boolean -> (Anonymization::inverseApply)(ctx) }
+        transformCode(inFile, outFile) { ctx: TreeContext, _: Boolean ->
+            (Anonymization::apply)(ctx, true)
+            (Anonymization::inverseApply)(ctx)
+        }
     }
 
 }
