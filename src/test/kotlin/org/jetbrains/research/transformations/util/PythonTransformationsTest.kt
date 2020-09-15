@@ -28,21 +28,25 @@ open class PythonTransformationsTest {
         ParserSetup.checkSetup()
     }
 
-    protected fun getSourcePythonCode(ctx: TreeContext, XMLDstPath: String): String {
+    protected fun getPythonSourceCode(ctx: TreeContext, XMLDstPath: String): String {
         val treeSerializer = ctx.toXMLWithoutRoot()
         treeSerializer.writeTo(XMLDstPath)
-        return Util.runProcessBuilder(ParserSetup.getCommandForInverseParser(XMLDstPath))
+        return Util.runProcessBuilder(ParserSetup.getCommandForInverseParser(XMLDstPath)).removeSuffix("\n")
     }
 
-    protected fun transformCode(inFile: File, outFile: File, transformation: (TreeContext, Boolean) -> Unit){
+    protected fun assertCodeTransformation(
+        inFile: File,
+        outFile: File,
+        transformation: (TreeContext, Boolean) -> Unit
+    ) {
         LOG.info("The current input file is: ${inFile.path}")
         LOG.info("The output input file is: ${outFile.path}")
         val treeCtx = PythonTreeGenerator().generateFromFile(inFile)
         val expectedSrc = Util.getContentFromFile(outFile)
         LOG.info("The expected code is:\n$expectedSrc")
         transformation(treeCtx, true)
-        val resultSrc = getSourcePythonCode(treeCtx, XMLTreeFileName)
-        LOG.info("The actual code is:\n$resultSrc")
-        Assertions.assertEquals(expectedSrc, resultSrc)
+        val actualSrc = getPythonSourceCode(treeCtx, XMLTreeFileName)
+        LOG.info("The actual code is:\n$actualSrc")
+        Assertions.assertEquals(expectedSrc, actualSrc)
     }
 }

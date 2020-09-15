@@ -55,6 +55,9 @@ object ParserSetup {
     private fun getRepositoryRootPath() =
         "${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER"
 
+    private fun getRepositoryZipPath() =
+        "${getParserRepositoryPath()}/$PARSER_ZIP_NAME"
+
     /**
      * Get parser repository path in this project in the resources folder
      */
@@ -78,10 +81,7 @@ object ParserSetup {
         unzipParserRepo()
     }
 
-    private fun unzipParserRepo(
-        zipParserRepoPath: String
-        = Paths.get("${getParserRepositoryPath()}/$PARSER_ZIP_NAME").toString()
-    ) {
+    private fun unzipParserRepo(zipParserRepoPath: String = getRepositoryZipPath()) {
         LOG.info("Unzipping the folder with the repository")
         val zipFile = ZipFile(zipParserRepoPath)
         val parserRepositoryPath = getParserRepositoryPath()

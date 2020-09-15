@@ -36,6 +36,6 @@ object Util {
     }
 
     fun getContentFromFile(file: File): String {
-        return file.readLines().joinToString(separator = "\n") { it }
+        return file.readLines().joinToString(separator = "\n") { it }.removeSuffix("\n")
     }
 }
