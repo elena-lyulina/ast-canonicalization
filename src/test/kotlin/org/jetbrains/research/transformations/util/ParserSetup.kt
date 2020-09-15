@@ -36,8 +36,8 @@ object ParserSetup {
 
     private const val PARSER_NAME = "pythonparser"
 
-    private val TARGET_PARSER_PATH = "${getTmpPath()}/$PARSER_NAME"
-    private val TARGET_INVERSE_PARSER_PATH = "${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH"
+    private val targetParserPath = "${getTmpPath()}/$PARSER_NAME"
+    private val targetInverseParserPath = "${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH"
 
     /**
      * Runs inverse_parser_3 using python3, which it gets from [PYTHON3_PROPERTY] or sets the default one
@@ -47,7 +47,7 @@ object ParserSetup {
         val defaultPythonBin = if (SystemUtils.IS_OS_WINDOWS) "where python3" else "which python3"
         val pythonBin = System.getProperty(PYTHON3_PROPERTY)?.let { "echo $it" } ?: defaultPythonBin
         return Util.Command(
-            listOf("/bin/bash", "-c", "$($pythonBin) $TARGET_INVERSE_PARSER_PATH $XMLPath"),
+            listOf("/bin/bash", "-c", "$($pythonBin) $targetInverseParserPath $XMLPath"),
             environment = mapOf("PYTHONPATH" to getRepositoryRootPath())
         )
     }
@@ -136,6 +136,6 @@ object ParserSetup {
         if (!isParserRepositoryRootFolderExist()) {
             unzipParserRepo()
         }
-        checkParserFile("$repositoryPath/$PARSER_RELATIVE_PATH", TARGET_PARSER_PATH, toUpdateRepository)
+        checkParserFile("$repositoryPath/$PARSER_RELATIVE_PATH", targetParserPath, toUpdateRepository)
     }
 }

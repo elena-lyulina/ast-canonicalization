@@ -13,10 +13,10 @@ import java.io.File
 * Just check if the parsers work correctly
 * */
 internal class PythonTransformationSetupTest: PythonTransformationsTest() {
-    private val SRC_FILE: String = javaClass.getResource("source.py").path
+    private val srcFile: String = javaClass.getResource("source.py").path
 
     private fun getTreeContext(): TreeContext {
-        return PythonTreeGenerator().generateFromFile(SRC_FILE)
+        return PythonTreeGenerator().generateFromFile(srcFile)
     }
 
     @Test
@@ -27,7 +27,7 @@ internal class PythonTransformationSetupTest: PythonTransformationsTest() {
     @Test
     fun checkInverseParserSetup() {
         val treeCtx = getTreeContext()
-        val expectedOutput = getContentFromFile(File(SRC_FILE))
+        val expectedOutput = getContentFromFile(File(srcFile))
         val actualOutput = getPythonSourceCode(treeCtx, XMLTreeFileName)
         Assertions.assertEquals(expectedOutput, actualOutput)
     }
