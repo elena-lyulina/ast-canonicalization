@@ -28,7 +28,7 @@ internal class PythonTransformationSetupTest: PythonTransformationsTest() {
     fun checkInverseParserSetup() {
         val treeCtx = getTreeContext()
         val expectedOutput = getContentFromFile(File(srcFile))
-        val actualOutput = getPythonSourceCode(treeCtx, XMLTreeFileName)
+        val actualOutput = getPythonSourceCode(treeCtx, xmlTreeFileName)
         Assertions.assertEquals(expectedOutput, actualOutput)
     }
 }

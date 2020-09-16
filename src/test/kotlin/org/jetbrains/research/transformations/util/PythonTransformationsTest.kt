@@ -6,6 +6,7 @@ import org.jetbrains.research.transformations.util.toXMLWithoutRoot
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.provider.Arguments
 import java.io.File
 import java.util.logging.Logger
 import kotlin.reflect.KFunction
@@ -14,11 +15,16 @@ import kotlin.reflect.KFunction
 open class PythonTransformationsTest {
     protected val LOG = Logger.getLogger(javaClass.name)
 
-    protected val XMLTreeFileName = "${Util.getTmpPath()}/test.xml"
+    protected val xmlTreeFileName = "${Util.getTmpPath()}/test.xml"
 
     companion object {
-        fun getResourcePath(resourceName: String, cls: KFunction<PythonTransformationsTest>): String {
-            return cls.javaClass.getResource(resourceName).path
+        fun getInAndOutArgumentsArray(
+            resourcesRootName: String,
+            cls: KFunction<PythonTransformationsTest>
+        ): Array<Arguments> {
+            val resourcesRootPath = cls.javaClass.getResource(resourcesRootName).path
+            val inAndOutFilesMap = Util.getInAndOutFilesMap(resourcesRootPath)
+            return inAndOutFilesMap.entries.map { (inFile, outFile) -> Arguments.of(inFile, outFile) }.toTypedArray()
         }
     }
 
@@ -45,7 +51,7 @@ open class PythonTransformationsTest {
         val expectedSrc = Util.getContentFromFile(outFile)
         LOG.info("The expected code is:\n$expectedSrc")
         transformation(treeCtx, true)
-        val actualSrc = getPythonSourceCode(treeCtx, XMLTreeFileName)
+        val actualSrc = getPythonSourceCode(treeCtx, xmlTreeFileName)
         LOG.info("The actual code is:\n$actualSrc")
         Assertions.assertEquals(expectedSrc, actualSrc)
     }

@@ -13,26 +13,23 @@ internal class AnonymizationTest : PythonTransformationsTest() {
 
     companion object {
         @JvmStatic
-        fun getResourceFolder(): Stream<Arguments> {
+        fun getTestData(): Stream<Arguments> {
             return Stream.of(
-                Arguments.of(
-                    getResourcePath("in_1.py", ::AnonymizationTest),
-                    getResourcePath("out_1.py", ::AnonymizationTest)
-                )
+                *getInAndOutArgumentsArray("data", ::AnonymizationTest)
             )
         }
     }
 
     @ParameterizedTest(name = "Apply anonymization test")
-    @MethodSource("getResourceFolder")
+    @MethodSource("getTestData")
     fun applyAnonymizationTests(inFile: File, outFile: File) {
         assertCodeTransformation(inFile, outFile, Anonymization::apply)
     }
 
     @ParameterizedTest(name = "Inverse apply anonymization test")
-    @MethodSource("getResourceFolder")
-    fun inverseApplyAnonymizationTests(outFile: File, inFile: File) {
-        assertCodeTransformation(inFile, outFile) { ctx: TreeContext, _: Boolean ->
+    @MethodSource("getTestData")
+    fun inverseApplyAnonymizationTests(inFile: File, outFile: File) {
+        assertCodeTransformation(inFile, inFile) { ctx: TreeContext, _: Boolean ->
             (Anonymization::apply)(ctx, true)
             (Anonymization::inverseApply)(ctx)
         }

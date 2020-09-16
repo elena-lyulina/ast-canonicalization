@@ -3,6 +3,7 @@ package org.jetbrains.research.transformations.util
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import java.lang.IllegalArgumentException
 
 
 object Util {
@@ -37,5 +38,23 @@ object Util {
 
     fun getContentFromFile(file: File): String {
         return file.readLines().joinToString(separator = "\n") { it }.removeSuffix("\n")
+    }
+
+    fun getInAndOutFilesMap(folder: String): Map<File, File> {
+        val inFileRegEx = "in_\\d*.py".toRegex()
+        val outFileRegEx = "out_\\d*.py".toRegex()
+        val (inFiles, outFiles) = File(folder).walk()
+            .filter { it.isFile && (inFileRegEx.containsMatchIn(it.name) || outFileRegEx.containsMatchIn(it.name)) }
+            .partition { inFileRegEx.containsMatchIn(it.name) }
+        if (inFiles.size != outFiles.size) {
+            throw IllegalArgumentException("Size of the list of in files does not equal size of the list of out files if the folder: $folder")
+        }
+        return inFiles.associateWith { inFile ->
+            val outFile = File("${inFile.parent}/${inFile.name.replace("in", "out")}")
+            if (!outFile.exists()) {
+                throw IllegalArgumentException("Out file $outFile does not exist!")
+            }
+            outFile
+        }
     }
 }
