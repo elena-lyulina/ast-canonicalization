@@ -8,5 +8,7 @@ enum class NodeType(val type: String) {
     // Argument of function
     ARG("arg"),
     // Function definition
-    FUNC_DEF("FunctionDef")
+    FUNC_DEF("FunctionDef"),
+    // Class definition
+    CLASS_DEF("ClassDef")
 }

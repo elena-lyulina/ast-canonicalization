@@ -20,12 +20,14 @@ internal class AnonymizationTest : PythonTransformationsTest() {
         }
     }
 
+    @ExperimentalStdlibApi
     @ParameterizedTest(name = "Apply anonymization test")
     @MethodSource("getTestData")
     fun applyAnonymizationTests(inFile: File, outFile: File) {
         assertCodeTransformation(inFile, outFile, Anonymization::apply)
     }
 
+    @ExperimentalStdlibApi
     @ParameterizedTest(name = "Inverse apply anonymization test")
     @MethodSource("getTestData")
     fun inverseApplyAnonymizationTests(inFile: File, outFile: File) {
