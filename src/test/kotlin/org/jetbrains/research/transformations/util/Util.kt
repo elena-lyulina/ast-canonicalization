@@ -37,7 +37,7 @@ object Util {
     }
 
     fun getContentFromFile(file: File): String {
-        return file.readLines().joinToString(separator = "\n") { it }.removeSuffix("\n")
+        return file.readLines().joinToString(separator = "\n") { it }
     }
 
     fun getInAndOutFilesMap(folder: String): Map<File, File> {
