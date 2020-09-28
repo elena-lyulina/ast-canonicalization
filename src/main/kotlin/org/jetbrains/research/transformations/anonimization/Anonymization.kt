@@ -36,7 +36,7 @@ object Anonymization : Transformation {
     private fun TreeContext.bordersOfTopNestedLevels(): Pair<List<Int>, List<Int>> {
         val lowerBoundsList = mutableListOf<Int>()
         val upperBoundsList = mutableListOf<Int>()
-        val boundNodeTypes = listOf(NodeType.FUNC_DEF.type, NodeType.CLASS_DEF.type)
+        val boundNodeTypes = listOf(NodeType.FUNC_DEF.key, NodeType.CLASS_DEF.key)
         val firstLevelNodesWithTypes = this.root.children.map { child -> Pair(child.id, this.getTypeLabel(child)) }
 
         firstLevelNodesWithTypes.mapIndexed { index, (nodeId, nodeType) ->
@@ -67,7 +67,7 @@ object Anonymization : Transformation {
             metaInformation.resetIds()
             metaInformation.anonVariablesMeta.currentIdsList.add(0)
             metaInformation.anonArgumentsMeta.currentIdsList.add(0)
-            if (nodeType == NodeType.CLASS_DEF.type) {
+            if (nodeType == NodeType.CLASS_DEF.key) {
                 metaInformation.anonFunctionsMeta.currentIdsList.add(0)
             }
         }
@@ -101,10 +101,10 @@ object Anonymization : Transformation {
             resetOrSetIds(node, metaInformation, nodeType, lowerBoundsList, upperBoundsList, resetLastIdMap)
 
             when (nodeType) {
-                NodeType.NAME_STORE.type -> {
+                NodeType.NAME_STORE.key -> {
                     handleNameStoreNode(node, metaInformation, currentPrefix, toStoreMetadata)
                 }
-                NodeType.ARG.type -> {
+                NodeType.ARG.key -> {
                     initAndFindLabel(
                         node,
                         metaInformation.anonArgumentsMeta,
@@ -113,10 +113,10 @@ object Anonymization : Transformation {
                         NodeType.ARG
                     )
                 }
-                NodeType.NAME_LOAD.type -> {
+                NodeType.NAME_LOAD.key -> {
                     handleNameLoadNode(node, metaInformation, currentPrefix, toStoreMetadata)
                 }
-                NodeType.FUNC_DEF.type -> {
+                NodeType.FUNC_DEF.key -> {
                     handleFuncOrClassDefinitionNode(
                         node,
                         metaInformation.anonFunctionsMeta,
@@ -127,7 +127,7 @@ object Anonymization : Transformation {
                         resetLastIdMap
                     )
                 }
-                NodeType.CLASS_DEF.type -> {
+                NodeType.CLASS_DEF.key -> {
                     handleFuncOrClassDefinitionNode(
                         node,
                         metaInformation.anonClassesMeta,
@@ -237,6 +237,7 @@ object Anonymization : Transformation {
             NodeType.CLASS_DEF -> {
                 CLASS_PREFIX
             }
+            else -> ""
         }
     }
 
