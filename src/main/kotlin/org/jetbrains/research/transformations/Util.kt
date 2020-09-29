@@ -21,15 +21,26 @@ fun TreeContext.transformAndGetNodes(
 }
 
 fun ITree.dfs(): Iterable<ITree> {
-    val traversal: MutableList<ITree> = ArrayList()
-    val currentNodes: Stack<ITree> = Stack()
-    this.children.reversed().forEach { currentNodes.push(it) }
-    while (!currentNodes.empty()) {
-        val c = currentNodes.pop()
-        traversal.add(c)
-        c.children.reversed().forEach { currentNodes.push(it) }
+    return object : Iterable<ITree> {
+        override fun iterator(): Iterator<ITree> {
+            return object : Iterator<ITree> {
+                val currentNodes: Stack<ITree> = Stack()
+
+                init {
+                    currentNodes.addAll(this@dfs.children.reversed())
+                }
+
+                override fun hasNext(): Boolean {
+                    return currentNodes.size != 0
+                }
+
+                override fun next(): ITree {
+                    val c = currentNodes.pop()
+                    currentNodes.addAll(c.children.reversed())
+                    return c
+                }
+
+            }
+        }
     }
-    return traversal
 }
-
-
