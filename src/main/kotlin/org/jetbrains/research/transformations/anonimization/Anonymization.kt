@@ -36,11 +36,11 @@ object Anonymization : Transformation {
     private fun TreeContext.bordersOfTopNestedLevels(): Pair<List<Int>, List<Int>> {
         val lowerBoundsList = mutableListOf<Int>()
         val upperBoundsList = mutableListOf<Int>()
-        val boundNodeTypes = listOf(NodeType.FUNC_DEF.key, NodeType.CLASS_DEF.key)
+        val boundNodeTypes = listOf(NodeType.FUNC_DEF.typeLabel, NodeType.CLASS_DEF.typeLabel)
         val firstLevelNodesWithTypes = this.root.children.map { child -> Pair(child.id, this.getTypeLabel(child)) }
 
         firstLevelNodesWithTypes.mapIndexed { index, (nodeId, nodeType) ->
-            if (boundNodeTypes.contains(nodeType)) {
+            if (nodeType in boundNodeTypes) {
                 upperBoundsList.add(nodeId)
                 firstLevelNodesWithTypes.getOrNull(index + 1)?.let {
                     lowerBoundsList.add(it.first)
@@ -58,21 +58,21 @@ object Anonymization : Transformation {
     private fun resetOrSetIds(
         node: ITree, metaInformation: AnonymizationMetaInformation, nodeType: String,
         lowerBoundsList: List<Int>, upperBoundsList: List<Int>,
-        resetLastIdMap: Map<Int, List<KFunction<Unit>>>
+        nodeIdToRemovingLastItemFunctionsMap: Map<Int, List<KFunction<Unit>>>
     ) {
-        if (lowerBoundsList.contains(node.id)) {
+        if (node.id in lowerBoundsList) {
             metaInformation.resetIds()
         }
-        if (upperBoundsList.contains(node.id)) {
+        if (node.id in upperBoundsList) {
             metaInformation.resetIds()
-            metaInformation.anonVariablesMeta.currentIdsList.add(0)
-            metaInformation.anonArgumentsMeta.currentIdsList.add(0)
-            if (nodeType == NodeType.CLASS_DEF.key) {
-                metaInformation.anonFunctionsMeta.currentIdsList.add(0)
+            metaInformation.anonVariablesInfo.currentIdsList.add(0)
+            metaInformation.anonArgumentsInfo.currentIdsList.add(0)
+            if (nodeType == NodeType.CLASS_DEF.typeLabel) {
+                metaInformation.anonFunctionsInfo.currentIdsList.add(0)
             }
         }
-        resetLastIdMap.getOrDefault(node.id, null)?.let { functions ->
-            functions.forEach { run { it } }
+        nodeIdToRemovingLastItemFunctionsMap[node.id]?.let { removingLastItemFunctions ->
+            removingLastItemFunctions.forEach { run { it } }
         }
     }
 
@@ -80,7 +80,7 @@ object Anonymization : Transformation {
     * A function can be nested into a function or into a class
     * */
     private fun isNestedFunctionIntoFunction(prefix: String): Boolean {
-        return prefix.split(SEPARATOR).last { it.isNotEmpty() }.contains(FUN_PREFIX)
+        return FUN_PREFIX in prefix.split(SEPARATOR).last { it.isNotEmpty() }
     }
 
     @ExperimentalStdlibApi
@@ -88,8 +88,13 @@ object Anonymization : Transformation {
         val metaInformation = AnonymizationMetaInformation()
 
         val (lowerBoundsList, upperBoundsList) = treeCtx.bordersOfTopNestedLevels()
+        // This variable stores nodes' ids which indicate that before handling the node we should reset some last ids
+        // from the meta-information lists. Each key (id) stores a list of functions to reset ids from the necessary
+        // meta-information lists. For example,  if the function is ended we should reset the counters for arguments
+        // and for variables (and for functions, if it is a nested function). This map allows us to control the borders
+        // of resetting ids.
         // Todo: get a better name
-        val resetLastIdMap = mutableMapOf<Int, List<KFunction<Unit>>>()
+        val nodeIdToRemovingLastItemFunctionsMap = mutableMapOf<Int, List<KFunction<Unit>>>()
 
         fun anonymizeNode(node: ITree) {
             if (hasStandardLabel(node)) {
@@ -98,44 +103,44 @@ object Anonymization : Transformation {
 
             val nodeType = treeCtx.getTypeLabel(node)
             val currentPrefix = getNodeLabelPrefix(node)
-            resetOrSetIds(node, metaInformation, nodeType, lowerBoundsList, upperBoundsList, resetLastIdMap)
+            resetOrSetIds(node, metaInformation, nodeType, lowerBoundsList, upperBoundsList, nodeIdToRemovingLastItemFunctionsMap)
 
             when (nodeType) {
-                NodeType.NAME_STORE.key -> {
+                NodeType.NAME_STORE.typeLabel -> {
                     handleNameStoreNode(node, metaInformation, currentPrefix, toStoreMetadata)
                 }
-                NodeType.ARG.key -> {
+                NodeType.ARG.typeLabel -> {
                     initAndFindLabel(
                         node,
-                        metaInformation.anonArgumentsMeta,
+                        metaInformation.anonArgumentsInfo,
                         currentPrefix,
                         toStoreMetadata,
                         NodeType.ARG
                     )
                 }
-                NodeType.NAME_LOAD.key -> {
+                NodeType.NAME_LOAD.typeLabel -> {
                     handleNameLoadNode(node, metaInformation, currentPrefix, toStoreMetadata)
                 }
-                NodeType.FUNC_DEF.key -> {
+                NodeType.FUNC_DEF.typeLabel -> {
                     handleFuncOrClassDefinitionNode(
                         node,
-                        metaInformation.anonFunctionsMeta,
+                        metaInformation.anonFunctionsInfo,
                         currentPrefix,
                         toStoreMetadata,
                         NodeType.FUNC_DEF,
                         metaInformation,
-                        resetLastIdMap
+                        nodeIdToRemovingLastItemFunctionsMap
                     )
                 }
-                NodeType.CLASS_DEF.key -> {
+                NodeType.CLASS_DEF.typeLabel -> {
                     handleFuncOrClassDefinitionNode(
                         node,
-                        metaInformation.anonClassesMeta,
+                        metaInformation.anonClassesInfo,
                         currentPrefix,
                         toStoreMetadata,
                         NodeType.CLASS_DEF,
                         metaInformation,
-                        resetLastIdMap
+                        nodeIdToRemovingLastItemFunctionsMap
                     )
                 }
             }
@@ -144,7 +149,7 @@ object Anonymization : Transformation {
         treeCtx.transformAndGetNodes(::anonymizeNode)
     }
 
-    private fun hasStandardLabel(node: ITree) = standardLabels.contains(node.label)
+    private fun hasStandardLabel(node: ITree) = node.label in standardLabels
 
     private fun findLabel(
         node: ITree, anonymousConfig: AnonymousNamesMap, currentPrefix: String,
@@ -185,21 +190,17 @@ object Anonymization : Transformation {
 
     private fun isNested(node: ITree, nodeType: NodeType): Boolean {
         val parentFunctionsLabels = getNotEmptyParentLabels(node).filter {
-            it.contains(
-                getNodeLabelPrefix(node).removeSuffix(
-                    SEPARATOR
-                )
-            )
+            getNodeLabelPrefix(node).removeSuffix(SEPARATOR) in it
         }
         return parentFunctionsLabels.isNotEmpty()
     }
 
-    /* Check if the node has the parent function and get its name
+    /* Check if the node has the parent label and get its name
      * Otherwise return EMPTY_PREFIX
      *
-     * The parent function means the function where the variable or the function argument is defined.
-     * We should find the parent function because we want to transform the X variable from the FUN1 into F1_V1
-     * not simple V1. If the parent functions list if empty it is the variable from the main block and
+     * The parent label means the function/class and so on where the variable, function or the function argument is defined.
+     * We should find the parent label because we want to transform the X variable from the FUN1 into F1_V1
+     * not simple V1. If the parent labels list if empty it is the variable from the main block and
      * we should not add a new prefix
      */
     private fun getNodeLabelPrefix(node: ITree): String {
@@ -261,7 +262,11 @@ object Anonymization : Transformation {
         markedLabel: String = EMPTY_PREFIX, toAddUnderscorePrefix: Boolean = true
     ): String {
         val newLabel =
-            if (toAddUnderscorePrefix) "${getUnderscorePrefix(node.label)}$prefix$markedLabel" else "$prefix$markedLabel"
+            if (toAddUnderscorePrefix) {
+                "${getUnderscorePrefix(node.label)}$prefix$markedLabel"
+            } else {
+                "$prefix$markedLabel"
+            }
         if (toStoreMetadata) node.setMetadata(metadataKey, mutableMapOf(newLabel to node.label))
         node.label = newLabel
         return newLabel
@@ -274,12 +279,12 @@ object Anonymization : Transformation {
         toStoreMetadata: Boolean
     ) {
         // Try to find the variable in the arguments of this function
-        if (findLabel(node, metaInformation.anonArgumentsMeta, currentPrefix, toStoreMetadata, false)) {
-            anonymizeVariable(node, metaInformation.anonArgumentsMeta, currentPrefix, toStoreMetadata)
+        if (findLabel(node, metaInformation.anonArgumentsInfo, currentPrefix, toStoreMetadata, false)) {
+            anonymizeVariable(node, metaInformation.anonArgumentsInfo, currentPrefix, toStoreMetadata)
         } else {
             initAndFindLabel(
                 node,
-                metaInformation.anonVariablesMeta,
+                metaInformation.anonVariablesInfo,
                 currentPrefix,
                 toStoreMetadata,
                 NodeType.NAME_STORE
@@ -306,21 +311,21 @@ object Anonymization : Transformation {
                                                        nodeType: NodeType,
                                                        currentPrefix: String,
                                                        metaInformation: AnonymizationMetaInformation,
-                                                       resetLastIdMap: MutableMap<Int, List<KFunction<Unit>>>) {
+                                                       nodeIdToRemovingLastItemFunctionsMap: MutableMap<Int, List<KFunction<Unit>>>) {
         if (nodeType == NodeType.CLASS_DEF) {
-            metaInformation.updateResetLastIdMapByNestedObjectType(node, NestedObjectType.CLASS, resetLastIdMap)
+            metaInformation.updateNodeIdToRemovingLastItemFunctionsMap(node, NestedObjectType.CLASS, nodeIdToRemovingLastItemFunctionsMap)
         } else if (nodeType == NodeType.FUNC_DEF) {
             if (isNestedFunctionIntoFunction(currentPrefix)) {
-                metaInformation.updateResetLastIdMapByNestedObjectType(
+                metaInformation.updateNodeIdToRemovingLastItemFunctionsMap(
                     node,
                     NestedObjectType.FUNCTION_INTO_CLASS,
-                    resetLastIdMap
+                    nodeIdToRemovingLastItemFunctionsMap
                 )
             } else {
-                metaInformation.updateResetLastIdMapByNestedObjectType(
+                metaInformation.updateNodeIdToRemovingLastItemFunctionsMap(
                     node,
                     NestedObjectType.FUNCTION_INTO_FUNCTION,
-                    resetLastIdMap
+                    nodeIdToRemovingLastItemFunctionsMap
                 )
             }
         }
@@ -334,10 +339,10 @@ object Anonymization : Transformation {
         toStoreMetadata: Boolean,
         nodeType: NodeType,
         fullMetaInformation: AnonymizationMetaInformation,
-        resetLastIdMap: MutableMap<Int, List<KFunction<Unit>>>
+        nodeIdToRemovingLastItemFunctionsMap: MutableMap<Int, List<KFunction<Unit>>>
     ) {
         if (isNested(node, nodeType)) {
-            updateResetLastIdMapByNestedObjectType(node, nodeType, currentPrefix, fullMetaInformation, resetLastIdMap)
+            updateResetLastIdMapByNestedObjectType(node, nodeType, currentPrefix, fullMetaInformation, nodeIdToRemovingLastItemFunctionsMap)
         }
         initLabel(node, currentMetaInformation, currentPrefix, toStoreMetadata, nodeType)
     }

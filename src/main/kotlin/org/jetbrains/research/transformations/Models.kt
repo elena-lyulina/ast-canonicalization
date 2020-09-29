@@ -2,7 +2,12 @@ package org.jetbrains.research.transformations
 
 import kotlin.reflect.KClass
 
-enum class NodeType(val key: String) {
+/*
+* [NodeType] stores all possible nodes' types in Python AST that are connected to transformations. This is usually the
+* root of some subtree - declaring or using a variable, declaring a class or function, and so on. The [typeLabel] stores
+* label from the XML tree from pythonparser.
+* */
+enum class NodeType(val typeLabel: String) {
     // Variable definition
     NAME_STORE("Name_Store"),
     // An existing variable/function and etc

@@ -128,7 +128,7 @@ object ParserSetup {
     }
 
     /*
-     * Check if pythonparser and inverse parser files is valid
+     * Check if pythonparser and inverse parser files are valid
      */
     fun checkSetup(toUpdateRepository: Boolean = false) {
         LOG.info("Checking correctness of a parser setup")

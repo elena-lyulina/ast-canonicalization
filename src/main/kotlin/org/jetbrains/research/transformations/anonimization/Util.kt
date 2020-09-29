@@ -47,6 +47,8 @@ interface ListIdCounter : Identifiable {
     }
 }
 
+typealias NamesMap = MutableMap<String, List<Pair<String, String>>>
+
 /*
 * @property namesMap stores a hashmap for labels for the different nodes. The format of it is:
 * OLD_LABEL -> list[(NEW_LABEL, FUNCTION_PREFIX)]
@@ -56,25 +58,19 @@ interface ListIdCounter : Identifiable {
 * For example, if the variable X is defined in the functions A and B then we have to store in the namesMap
 * FUNCTION_PREFIXes for both of them to set the new name unequivocally by the current function name
 * */
-abstract class AnonymousNamesMap(open val namesMap: MutableMap<String, List<Pair<String, String>>>) : Identifiable {
+abstract class AnonymousNamesMap(open val namesMap: NamesMap) : Identifiable {
     abstract fun initLabel(oldLabel: String, newLabel: String, parentPrefix: String)
 
     fun getPrefixes(node: ITree): List<String> {
-        return namesMap.getOrDefault(node.label, listOf()).map { (_, parent_prefix) -> parent_prefix }
+        return namesMap[node.label]?.map { it.second } ?: emptyList()
     }
 
     fun getNewLabelByPrefix(oldLabel: String, prefix: String): String? {
-        return namesMap[oldLabel]?.find { (_, parentPrefix) -> parentPrefix == prefix }
-            ?.let { (newLabel, _) ->
-                newLabel
-            }
+        return namesMap[oldLabel]?.find { it.second == prefix }?.first
     }
 
     fun getNewLabelByLabel(oldLabel: String, prefix: String, separator: String = Anonymization.SEPARATOR): String? {
-        return namesMap[oldLabel]?.find { (newLabel, _) -> newLabel == prefix.removeSuffix(separator) }
-            ?.let { (newLabel, _) ->
-                newLabel
-            }
+        return namesMap[oldLabel]?.find { it.first == prefix.removeSuffix(separator) }?.first
     }
 }
 
@@ -84,33 +80,34 @@ data class AnonymousConfigWithListId(
 ) : ListIdCounter, AnonymousNamesMap(namesMap) {
 
     /*
-    * Add a new item into [namesMap] and increment the if from the last (current) nested level
+    * Add a new item into [namesMap] and increment the id from the last (current) nested level
     * */
     override fun initLabel(oldLabel: String, newLabel: String, parentPrefix: String) {
         namesMap[oldLabel] = listOf(Pair(newLabel, parentPrefix))
-        currentIdsList[currentIdsList.size - 1]++
+        currentIdsList[currentIdsList.lastIndex]++
     }
 }
 
 data class AnonymizationMetaInformation(
-    val anonArgumentsMeta: AnonymousConfigWithListId = AnonymousConfigWithListId(),
-    val anonVariablesMeta: AnonymousConfigWithListId = AnonymousConfigWithListId(),
-    val anonFunctionsMeta: AnonymousConfigWithListId = AnonymousConfigWithListId(),
-    val anonClassesMeta: AnonymousConfigWithListId = AnonymousConfigWithListId()
+    val anonArgumentsInfo: AnonymousConfigWithListId = AnonymousConfigWithListId(),
+    val anonVariablesInfo: AnonymousConfigWithListId = AnonymousConfigWithListId(),
+    val anonFunctionsInfo: AnonymousConfigWithListId = AnonymousConfigWithListId(),
+    val anonClassesInfo: AnonymousConfigWithListId = AnonymousConfigWithListId()
 ) {
 
     fun resetIds() {
-        anonVariablesMeta.resetIds()
-        anonArgumentsMeta.resetIds()
-        anonFunctionsMeta.resetIds()
-        anonClassesMeta.resetIds()
+        anonVariablesInfo.resetIds()
+        anonArgumentsInfo.resetIds()
+        anonFunctionsInfo.resetIds()
+        anonClassesInfo.resetIds()
     }
 
     fun findLabel(label: String, prefix: String): String? {
         // Try to find the current variable
-        anonArgumentsMeta.getNewLabelByPrefix(label, prefix)?.let { return it }
-        anonVariablesMeta.getNewLabelByPrefix(label, prefix)?.let { return it }
-        anonFunctionsMeta.getNewLabelByPrefix(label, prefix)?.let { return it }
+        anonArgumentsInfo.getNewLabelByPrefix(label, prefix)?.let { return it }
+        anonVariablesInfo.getNewLabelByPrefix(label, prefix)?.let { return it }
+        anonFunctionsInfo.getNewLabelByPrefix(label, prefix)?.let { return it }
+        anonClassesInfo.getNewLabelByPrefix(label, prefix)?.let { return it }
 
         /*
         * Try to find the current variable into names. For example if we have the function:
@@ -119,27 +116,36 @@ data class AnonymizationMetaInformation(
         *    print(foo)
         *    print(foo())
         *
-        * We have to find foo in the names of anonFunctionsMeta (or in the anonClassesMeta if it id a class)
+        * We have to find foo in the names of anonFunctionsMeta (or in the anonClassesMeta if it is a class)
         */
-        anonFunctionsMeta.getNewLabelByLabel(label, prefix)?.let { return it }
-        anonClassesMeta.getNewLabelByLabel(label, prefix)?.let { return it }
+        anonFunctionsInfo.getNewLabelByLabel(label, prefix)?.let { return it }
+        anonClassesInfo.getNewLabelByLabel(label, prefix)?.let { return it }
         return null
     }
 
     // Todo: thinking about names
     /*
     * See [NestedObjectType]
+    * At different nesting levels, we want to update the counters differently after the current nesting level ends.
+    * For example, if the external function is ended, then we want to reset only the counters of variables and arguments.
+    * But if the function was nested, then we also want to reset the counter for the functions in the meta-information.
+    * We get the root of the subtree (the beginning of the nesting level) and the [NestedObjectType] that characterizes
+    * the nesting level of the current vertex. Following this type, we can determine which of the counters we want to
+    * reset after the end of the current nesting level and update the [nodeIdToRemovingLastItemFunctionsMap].
     * */
     @ExperimentalStdlibApi
-    fun updateResetLastIdMapByNestedObjectType(node: ITree, nestedObjectType: NestedObjectType,
-                                               resetLastIdMap: MutableMap<Int, List<KFunction<Unit>>>) {
-        val levels = listOf(anonVariablesMeta, anonArgumentsMeta, anonFunctionsMeta, anonClassesMeta)
-        val removeLastFunctions = mutableListOf<KFunction<Unit>>()
+    fun updateNodeIdToRemovingLastItemFunctionsMap(node: ITree, nestedObjectType: NestedObjectType,
+                                                   nodeIdToRemovingLastItemFunctionsMap: MutableMap<Int, List<KFunction<Unit>>>) {
+        val levels = listOf(anonVariablesInfo, anonArgumentsInfo, anonFunctionsInfo, anonClassesInfo)
+        // This list stored functions that allowing remove the last item from a meta-information list. Sometimes we
+        // want to remove the last item from several meta-information lists, but not from all. So we stores which
+        // meta-information lists will be used for deleting the last item.
+        val removingLastItemFunctions = mutableListOf<KFunction<Unit>>()
         levels.subList(0, nestedObjectType.nestedLevel).forEach{
             it.currentIdsList.add(0)
-            removeLastFunctions.add(it::removeLast)
+            removingLastItemFunctions.add(it::removeLast)
         }
-        resetLastIdMap[node.children.last().id] = removeLastFunctions
+        nodeIdToRemovingLastItemFunctionsMap[node.children.last().id] = removingLastItemFunctions
     }
 }
 
@@ -149,7 +155,7 @@ data class AnonymizationMetaInformation(
 * - [2] arguments
 * - [3] functions
 * - [4] classes
-* For each nested object type we should reset ifs on the different levels
+* For each nested object type we should reset ids on the different levels
 * If a nested object is a function nested into another function, we should use only [1] and [2] levels.
 * If a nested object is a function nested into a class, we should use [1], [2] and [3] levels.
 * If a nested object is a class, we should use all levels.

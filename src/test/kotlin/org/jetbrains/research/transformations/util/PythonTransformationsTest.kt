@@ -46,7 +46,7 @@ open class PythonTransformationsTest {
         transformation: (TreeContext, Boolean) -> Unit
     ) {
         LOG.info("The current input file is: ${inFile.path}")
-        LOG.info("The output input file is: ${outFile.path}")
+        LOG.info("The current output file is: ${outFile.path}")
         val treeCtx = PythonTreeGenerator().generateFromFile(inFile)
         val expectedSrc = Util.getContentFromFile(outFile)
         LOG.info("The expected code is:\n$expectedSrc")

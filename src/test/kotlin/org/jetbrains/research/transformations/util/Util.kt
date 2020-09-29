@@ -42,9 +42,9 @@ object Util {
 
     fun getInAndOutFilesMap(folder: String): Map<File, File> {
         val inFileRegEx = "in_\\d*.py".toRegex()
-        val outFileRegEx = "out_\\d*.py".toRegex()
+        val inOutFileRegEx = "(in|out)_\\d*.py".toRegex()
         val (inFiles, outFiles) = File(folder).walk()
-            .filter { it.isFile && (inFileRegEx.containsMatchIn(it.name) || outFileRegEx.containsMatchIn(it.name)) }
+            .filter { it.isFile && inOutFileRegEx.containsMatchIn(it.name) }
             .partition { inFileRegEx.containsMatchIn(it.name) }
         if (inFiles.size != outFiles.size) {
             throw IllegalArgumentException("Size of the list of in files does not equal size of the list of out files if the folder: $folder")
