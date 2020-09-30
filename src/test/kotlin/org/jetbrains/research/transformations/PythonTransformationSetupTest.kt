@@ -12,7 +12,7 @@ import java.io.File
 /*
 * Just check if the parsers work correctly
 * */
-internal class PythonTransformationSetupTest: PythonTransformationsTest() {
+internal class PythonTransformationSetupTest : PythonTransformationsTest() {
     private val srcFile: String = javaClass.getResource("source.py").path
 
     private fun getTreeContext(): TreeContext {

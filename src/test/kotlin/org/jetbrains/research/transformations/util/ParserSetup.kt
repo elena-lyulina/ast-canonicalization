@@ -24,20 +24,21 @@ object ParserSetup {
     private const val PYTHON3_PROPERTY = "ac.p3.path"
     private const val PYTHONPARSER_PROPERTY = "gt.pp.path"
 
-    private const val PARSER_REPOSITORY_ZIP_URL =
+    private const val PARSER_REPO_ZIP_URL =
         "https://github.com/JetBrains-Research/pythonparser/archive/master.zip"
     private const val PARSER_ZIP_NAME = "master.zip"
 
     // Relative path in the parser repository
-    private const val REPOSITORY_ROOT_FOLDER = "pythonparser-master"
-    private const val PARSER_RELATIVE_PATH = "$REPOSITORY_ROOT_FOLDER/src/main/python/pythonparser/pythonparser_3.py"
+    private const val PARSER_REPO_FOLDER = "pythonparser-master"
+    private const val PARSER_RELATIVE_PATH = "$PARSER_REPO_FOLDER/src/main/python/pythonparser/pythonparser_3.py"
     private const val INVERSE_PARSER_RELATIVE_PATH =
-        "$REPOSITORY_ROOT_FOLDER/src/main/python/inverse_parser/inverse_parser_3.py"
+        "$PARSER_REPO_FOLDER/src/main/python/inverse_parser/inverse_parser_3.py"
 
-    private const val PARSER_NAME = "pythonparser"
-
-    private val targetParserPath = "${getTmpPath()}/$PARSER_NAME"
-    private val targetInverseParserPath = "${getParserRepositoryPath()}/$INVERSE_PARSER_RELATIVE_PATH"
+    const val PARSER_NAME = "pythonparser"
+    val targetParserPath = "${getTmpPath()}/$PARSER_NAME"
+    val targetInverseParserPath = "${getParserRepoParentFolder()}/$INVERSE_PARSER_RELATIVE_PATH"
+    val parserRepoPath = "${getParserRepoParentFolder()}/$PARSER_REPO_FOLDER"
+    val parserZipPath = "${getParserRepoParentFolder()}/$PARSER_ZIP_NAME"
 
     /**
      * Runs inverse_parser_3 using python3, which it gets from [PYTHON3_PROPERTY] or sets the default one
@@ -48,43 +49,34 @@ object ParserSetup {
         val pythonBin = System.getProperty(PYTHON3_PROPERTY)?.let { "echo $it" } ?: defaultPythonBin
         return Util.Command(
             listOf("/bin/bash", "-c", "$($pythonBin) $targetInverseParserPath $XMLPath"),
-            environment = mapOf("PYTHONPATH" to getRepositoryRootPath())
+            environment = mapOf("PYTHONPATH" to parserRepoPath)
         )
     }
 
-    private fun getRepositoryRootPath() =
-        "${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER"
-
-    private fun getRepositoryZipPath() =
-        "${getParserRepositoryPath()}/$PARSER_ZIP_NAME"
-
     /**
-     * Get parser repository path in this project in the resources folder
+     * Get a parent folder of parser repository, which is stored in this project in the resources folder
      */
-    private fun getParserRepositoryPath(): String {
-        val zipFilePath = Paths.get(javaClass.getResource(PARSER_ZIP_NAME).path)
+    private fun getParserRepoParentFolder(): String {
+        val parserParentFolder = javaClass.getResource(PARSER_NAME).path
         // TODO: find a better way for it
-        return zipFilePath.parent.toString().replace("build/resources/test/", "src/test/resources/")
+        return parserParentFolder.replace("build/resources/test/", "src/test/resources/")
     }
 
     /**
-     * Update parser repository
-     * @param toUpdate - it is true, if a new version of the parser needs to download
+     * Update parser zip file
      */
-    private fun updateParserRepo(toUpdate: Boolean) {
-        val zipFilePath = Paths.get("${getParserRepositoryPath()}/$PARSER_ZIP_NAME")
-        if (toUpdate) {
-            LOG.info("Updating the current master zip")
-            val file: InputStream = URL(PARSER_REPOSITORY_ZIP_URL).openStream()
-            Files.copy(file, zipFilePath, StandardCopyOption.REPLACE_EXISTING)
-        }
-        unzipParserRepo()
+    private fun updateParserZip() {
+        val zipFilePath = Paths.get("${getParserRepoParentFolder()}/$PARSER_ZIP_NAME")
+        LOG.info("Updating the current master zip")
+        val file: InputStream = URL(PARSER_REPO_ZIP_URL).openStream()
+        Files.copy(file, zipFilePath, StandardCopyOption.REPLACE_EXISTING)
     }
 
-    private fun unzipParserRepo(zipParserRepoPath: String = getRepositoryZipPath()) {
+    private fun unzipParserRepo(zipParserRepoPath: String = parserZipPath) {
         LOG.info("Unzipping the folder with the repository")
         val zipFile = ZipFile(zipParserRepoPath)
-        val parserRepositoryPath = getParserRepositoryPath()
+        val parserRepositoryPath = getParserRepoParentFolder()
+        File(parserRepoPath).deleteRecursively()
         zipFile.extractAll(parserRepositoryPath)
     }
 
@@ -103,14 +95,15 @@ object ParserSetup {
      * if not - makes it so.
      */
     private fun checkParserFile(
-        parserFilePath: String, targetPath: String, toUpdateRepository: Boolean = false,
+        parserFilePath: String,
+        targetPath: String,
+        toUpdateTargetFile: Boolean,
         toAddIntoSystemPath: Boolean = true
     ) {
         val targetFile = File(targetPath)
-        if (!targetFile.exists() || toUpdateRepository) {
+        if (!targetFile.exists() || toUpdateTargetFile) {
             LOG.info("Parser file will be created in $targetPath")
             val parserFile = File(parserFilePath)
-            updateParserRepo(toUpdateRepository)
             parserFile.copyTo(File(targetPath), overwrite = true)
             makeFileExecutable(targetFile)
         } else {
@@ -122,20 +115,25 @@ object ParserSetup {
         }
     }
 
-    private fun isParserRepositoryRootFolderExist(): Boolean {
-        val repoFolder = File("${getParserRepositoryPath()}/$REPOSITORY_ROOT_FOLDER")
-        return repoFolder.exists()
+    private fun String.exists() : Boolean {
+        return File(this).exists()
     }
 
     /*
      * Check if pythonparser and inverse parser files are valid
      */
-    fun checkSetup(toUpdateRepository: Boolean = false) {
+    fun checkSetup(toUpdateRepo: Boolean = false) {
         LOG.info("Checking correctness of a parser setup")
-        val repositoryPath = getParserRepositoryPath()
-        if (!isParserRepositoryRootFolderExist()) {
+        val parserPath = "${getParserRepoParentFolder()}/$PARSER_RELATIVE_PATH"
+
+        if (toUpdateRepo || !parserPath.exists()) {
+            LOG.info("There is no parser repo (${!parserPath.exists()}) or it needs to be updated ($toUpdateRepo)")
+            if (toUpdateRepo || !parserZipPath.exists()) {
+                LOG.info("There is no parser zip (${!parserZipPath.exists()}) or it needs to be updated ($toUpdateRepo)")
+                updateParserZip()
+            }
             unzipParserRepo()
         }
-        checkParserFile("$repositoryPath/$PARSER_RELATIVE_PATH", targetParserPath, toUpdateRepository)
+        checkParserFile(parserPath, targetParserPath, toUpdateRepo)
     }
 }
