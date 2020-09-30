@@ -20,9 +20,14 @@ dependencies {
     implementation("com.github.gumtreediff", "client.diff", "2.1.2")
     implementation("com.github.gumtreediff", "core", "2.1.2")
     implementation("commons-io", "commons-io", "2.5")
+    implementation("org.apache.commons", "commons-lang3", "3.11")
+
 
     testImplementation("com.github.gumtreediff", "gen.python", "2.1.2")
-    testImplementation(kotlin("test-junit"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.0.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
+    testImplementation("net.lingala.zip4j", "zip4j", "2.6.1")
 }
 
 tasks {
@@ -34,11 +39,12 @@ tasks {
     }
     test {
         useJUnitPlatform()
-
         dependsOn("cleanTest")
-
         testLogging {
             events("passed", "skipped", "failed")
         }
+//      Add -Pac.p3.path=/path/to/python3 to the command line to make it work
+//      Todo: is there a better way?
+        systemProperties = project.properties.filterKeys { it in listOf("ac.p3.path") }
     }
 }
