@@ -1,9 +1,11 @@
 package org.jetbrains.research.transformations
 
+import PythonTransformationsTest
 import com.github.gumtreediff.gen.python.PythonTreeGenerator
 import com.github.gumtreediff.tree.TreeContext
 
 import org.jetbrains.research.transformations.util.ParserSetup
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.io.File
@@ -11,7 +13,7 @@ import java.io.File
 /*
 * Check if parser setup works correctly
 * */
-internal class PythonSetupTest {
+internal class PythonSetupTest : PythonTransformationsTest() {
     private val srcFile: String = javaClass.getResource("source.py").path
     private val parserRepoFile = File(ParserSetup.parserRepoPath)
     private val parserZipFile = File(ParserSetup.parserZipPath)
