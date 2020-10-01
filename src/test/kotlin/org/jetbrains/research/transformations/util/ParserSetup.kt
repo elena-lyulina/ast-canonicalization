@@ -34,9 +34,9 @@ object ParserSetup {
     private const val INVERSE_PARSER_RELATIVE_PATH =
         "$PARSER_REPO_FOLDER/src/main/python/inverse_parser/inverse_parser_3.py"
 
-    const val PARSER_NAME = "pythonparser"
+    private const val PARSER_NAME = "pythonparser"
+    private val targetInverseParserPath = "${getParserRepoParentFolder()}/$INVERSE_PARSER_RELATIVE_PATH"
     val targetParserPath = "${getTmpPath()}/$PARSER_NAME"
-    val targetInverseParserPath = "${getParserRepoParentFolder()}/$INVERSE_PARSER_RELATIVE_PATH"
     val parserRepoPath = "${getParserRepoParentFolder()}/$PARSER_REPO_FOLDER"
     val parserZipPath = "${getParserRepoParentFolder()}/$PARSER_ZIP_NAME"
 
